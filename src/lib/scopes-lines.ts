@@ -20,7 +20,9 @@ export type MtoRow = {
   partId: string;
   materialId: string;
   description: string;
+  quantity: number;
   value: number;
+  unit: string;
 };
 
 export type OfferLinePart = {
@@ -39,179 +41,6 @@ export type OfferScope = {
   id: string;
   scopeId: string;
   lines: OfferLine[];
-};
-
-export const scopes: Scope[] = [
-  {
-    id: "scope-1000a-al",
-    name: "1000A AL",
-    description: "Aluminum busduct scope for 1000A feeders.",
-  },
-  {
-    id: "scope-1600a-al",
-    name: "1600A AL",
-    description: "Aluminum busduct scope for 1600A feeders.",
-  },
-  {
-    id: "scope-2500a-cu",
-    name: "2500A CU",
-    description: "Copper busduct scope for high-current lines.",
-  },
-];
-
-export const parts: Part[] = [
-  {
-    id: "part-feeder-1000",
-    scopeId: "scope-1000a-al",
-    name: "FEEDER-1000",
-  },
-  {
-    id: "part-top-off-box-250",
-    scopeId: "scope-1000a-al",
-    name: "TOP OFF BOX 250",
-  },
-  {
-    id: "part-elbow-1000",
-    scopeId: "scope-1000a-al",
-    name: "ELBOW-1000",
-  },
-  {
-    id: "part-feeder-1600",
-    scopeId: "scope-1600a-al",
-    name: "FEEDER-1600",
-  },
-  {
-    id: "part-plug-in-1600",
-    scopeId: "scope-1600a-al",
-    name: "PLUG IN BOX 1600",
-  },
-  {
-    id: "part-feeder-2500-cu",
-    scopeId: "scope-2500a-cu",
-    name: "FEEDER-2500 CU",
-  },
-];
-
-export const mtoRows: MtoRow[] = [
-  {
-    id: "mto-feeder-1000-al-profile",
-    scopeId: "scope-1000a-al",
-    partId: "part-feeder-1000",
-    materialId: "mat-al-profile",
-    description: "Aluminum profile body",
-    value: 668916.6986,
-  },
-  {
-    id: "mto-feeder-1000-bolts",
-    scopeId: "scope-1000a-al",
-    partId: "part-feeder-1000",
-    materialId: "mat-bolt-6x20",
-    description: "Connection bolts",
-    value: 12,
-  },
-  {
-    id: "mto-top-off-al-profile",
-    scopeId: "scope-1000a-al",
-    partId: "part-top-off-box-250",
-    materialId: "mat-al-profile",
-    description: "Tap-off enclosure profile",
-    value: 183600,
-  },
-  {
-    id: "mto-elbow-al-profile",
-    scopeId: "scope-1000a-al",
-    partId: "part-elbow-1000",
-    materialId: "mat-al-profile",
-    description: "Elbow aluminum profile",
-    value: 123333.3333,
-  },
-  {
-    id: "mto-feeder-1600-al-profile",
-    scopeId: "scope-1600a-al",
-    partId: "part-feeder-1600",
-    materialId: "mat-al-profile",
-    description: "1600A aluminum body",
-    value: 995833.3333,
-  },
-  {
-    id: "mto-plug-in-1600-insulator",
-    scopeId: "scope-1600a-al",
-    partId: "part-plug-in-1600",
-    materialId: "mat-insulator",
-    description: "Plug-in support insulators",
-    value: 1305084.7458,
-  },
-  {
-    id: "mto-feeder-2500-cu-copper",
-    scopeId: "scope-2500a-cu",
-    partId: "part-feeder-2500-cu",
-    materialId: "mat-copper-bar",
-    description: "Copper conductor bars",
-    value: 408888.8889,
-  },
-];
-
-export const seedOfferScopes: Record<string, OfferScope[]> = {
-  "off-2026-001": [
-    {
-      id: "offer-scope-001-1000a",
-      scopeId: "scope-1000a-al",
-      lines: [
-        {
-          id: "line-001-main-riser",
-          name: "Main riser",
-          parts: [
-            {
-              id: "line-part-001-feeder",
-              partId: "part-feeder-1000",
-              qty: 1,
-            },
-            {
-              id: "line-part-001-top-off",
-              partId: "part-top-off-box-250",
-              qty: 2,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: "offer-scope-001-1600a",
-      scopeId: "scope-1600a-al",
-      lines: [
-        {
-          id: "line-001-plant-room",
-          name: "Plant room feeder",
-          parts: [
-            {
-              id: "line-part-001-feeder-1600",
-              partId: "part-feeder-1600",
-              qty: 1,
-            },
-          ],
-        },
-      ],
-    },
-  ],
-  "off-2026-002": [
-    {
-      id: "offer-scope-002-1000a",
-      scopeId: "scope-1000a-al",
-      lines: [
-        {
-          id: "line-002-east-wing",
-          name: "East wing",
-          parts: [
-            {
-              id: "line-part-002-elbow",
-              partId: "part-elbow-1000",
-              qty: 4,
-            },
-          ],
-        },
-      ],
-    },
-  ],
 };
 
 function toOfferScope(scope: {
@@ -248,12 +77,19 @@ async function syncOfferScopeLineCounts(offerId: string) {
   });
 }
 
-export function getPartsForScope(scopeId?: string) {
-  if (!scopeId) {
-    return parts;
-  }
+export async function getScopes(): Promise<Scope[]> {
+  return prisma.scope.findMany({ orderBy: { name: "asc" } });
+}
 
-  return parts.filter((part) => part.scopeId === scopeId);
+export async function getPartsForScope(scopeId?: string): Promise<Part[]> {
+  return prisma.part.findMany({
+    where: scopeId ? { scopeId } : undefined,
+    orderBy: { name: "asc" },
+  });
+}
+
+export async function getMtoRows(): Promise<MtoRow[]> {
+  return prisma.mtoRow.findMany({ orderBy: { id: "asc" } });
 }
 
 export async function getOfferScopes(offerId: string) {
@@ -272,7 +108,7 @@ export async function getOfferScopes(offerId: string) {
 }
 
 export async function addScopeToOffer(offerId: string, scopeId: string) {
-  const scope = getScopeById(scopeId);
+  const scope = await getScopeById(scopeId);
 
   if (!scope) {
     return { error: "Scope not found." };
@@ -339,7 +175,7 @@ export async function addPartToLine(
     include: { lines: true },
   });
   const line = offerScope?.lines.find((candidate) => candidate.id === lineId);
-  const part = getPartById(partId);
+  const part = await getPartById(partId);
 
   if (!offerScope || !line) {
     return { error: "Line not found." };
@@ -366,18 +202,19 @@ export async function addPartToLine(
   return { data: { id: linePart.id, partId: linePart.partId, qty: linePart.qty } };
 }
 
-export function getScopeById(scopeId: string) {
-  return scopes.find((scope) => scope.id === scopeId);
+export async function getScopeById(scopeId: string) {
+  return prisma.scope.findUnique({ where: { id: scopeId } });
 }
 
-export function getPartById(partId: string) {
-  return parts.find((part) => part.id === partId);
+export async function getPartById(partId: string) {
+  return prisma.part.findUnique({ where: { id: partId } });
 }
 
-export function getMtoRowsForPart(scopeId: string, partId: string) {
-  return mtoRows.filter(
-    (row) => row.scopeId === scopeId && row.partId === partId
-  );
+export async function getMtoRowsForPart(scopeId: string, partId: string) {
+  return prisma.mtoRow.findMany({
+    where: { scopeId, partId },
+    orderBy: { id: "asc" },
+  });
 }
 
 export async function getPartUnitPrice(
@@ -388,8 +225,9 @@ export async function getPartUnitPrice(
   const materialPricesById = new Map(
     (await getMaterialPricesForOffer(offerId)).map((price) => [price.materialId, price])
   );
+  const rows = await getMtoRowsForPart(scopeId, partId);
 
-  return getMtoRowsForPart(scopeId, partId).reduce((sum, row) => {
+  return rows.reduce((sum, row) => {
     const materialPrice = materialPricesById.get(row.materialId);
 
     return sum + row.value * (materialPrice?.projectPrice ?? 0);

@@ -1,7 +1,7 @@
 import {
-  getMaterialPriceSummary,
   getMaterialPricesForOffer,
 } from "@/lib/material-prices";
+import { getActiveMtoVersion } from "@/lib/master-data";
 import { getOfferById } from "@/lib/offers";
 import { prisma } from "@/lib/prisma";
 import {
@@ -72,7 +72,10 @@ export async function validateCalculationInputs(offerId: string) {
 
   const offerScopes = await getOfferScopes(offerId);
   const scopeSummary = await getScopeLineSummary(offerId);
-  const priceSummary = await getMaterialPriceSummary(offerId);
+  const materialPricesById = new Map(
+    (await getMaterialPricesForOffer(offerId)).map((price) => [price.materialId, price])
+  );
+  const missingMaterialPriceIds = new Set<string>();
 
   if (offerScopes.length === 0) {
     issues.push({
@@ -82,7 +85,7 @@ export async function validateCalculationInputs(offerId: string) {
   }
 
   for (const offerScope of offerScopes) {
-    const scope = getScopeById(offerScope.scopeId);
+    const scope = await getScopeById(offerScope.scopeId);
 
     if (offerScope.lines.length === 0) {
       issues.push({
@@ -107,7 +110,7 @@ export async function validateCalculationInputs(offerId: string) {
       }
 
       for (const linePart of line.parts) {
-        const part = getPartById(linePart.partId);
+        const part = await getPartById(linePart.partId);
 
         if (!part || part.scopeId !== offerScope.scopeId) {
           issues.push({
@@ -116,11 +119,23 @@ export async function validateCalculationInputs(offerId: string) {
           });
         }
 
-        if (part && getMtoRowsForPart(offerScope.scopeId, linePart.partId).length === 0) {
+        const mtoRows = part
+          ? await getMtoRowsForPart(offerScope.scopeId, linePart.partId)
+          : [];
+
+        if (part && mtoRows.length === 0) {
           issues.push({
             code: "MISSING_MTO_ROWS",
             message: `No MTO rows found for ${part.name} in ${scope?.name ?? "scope"}.`,
           });
+        }
+
+        for (const row of mtoRows) {
+          const price = materialPricesById.get(row.materialId);
+
+          if (!price || price.projectPrice === null) {
+            missingMaterialPriceIds.add(row.materialId);
+          }
         }
 
         if (linePart.qty <= 0) {
@@ -140,10 +155,10 @@ export async function validateCalculationInputs(offerId: string) {
     });
   }
 
-  if (priceSummary.unresolved > 0) {
+  if (missingMaterialPriceIds.size > 0) {
     issues.push({
       code: "UNRESOLVED_PRICES",
-      message: "Resolve empty project material prices before calculation.",
+      message: "Resolve empty project material prices required by selected MTO rows before calculation.",
     });
   }
 
@@ -156,13 +171,19 @@ async function buildCalculationRun(offerId: string): Promise<CalculationRun> {
   const materialPricesById = new Map(
     (await getMaterialPricesForOffer(offerId)).map((price) => [price.materialId, price])
   );
+  const activeVersion = await getActiveMtoVersion();
+  const scopeResults: CalculationScopeResult[] = [];
 
-  const scopeResults = offerScopes.map((offerScope) => {
-    const scope = getScopeById(offerScope.scopeId);
-    const lineResults = offerScope.lines.map((line) => {
-      const partResults = line.parts.map((linePart) => {
-        const part = getPartById(linePart.partId);
-        const mtoRows = getMtoRowsForPart(offerScope.scopeId, linePart.partId);
+  for (const offerScope of offerScopes) {
+    const scope = await getScopeById(offerScope.scopeId);
+    const lineResults: CalculationLineResult[] = [];
+
+    for (const line of offerScope.lines) {
+      const partResults: CalculationPartResult[] = [];
+
+      for (const linePart of line.parts) {
+        const part = await getPartById(linePart.partId);
+        const mtoRows = await getMtoRowsForPart(offerScope.scopeId, linePart.partId);
         const details = mtoRows.map((row) => {
           const materialPrice = materialPricesById.get(row.materialId);
           const unitPrice = materialPrice?.projectPrice ?? 0;
@@ -181,39 +202,42 @@ async function buildCalculationRun(offerId: string): Promise<CalculationRun> {
         const unitPrice = details.reduce((sum, row) => sum + row.total, 0);
         const total = unitPrice * linePart.qty;
 
-        return {
+        partResults.push({
           partId: linePart.partId,
           partName: part?.name ?? "Unknown part",
           qty: linePart.qty,
           unitPrice,
           total,
           details,
-        };
-      });
+        });
+      }
+
       const lineTotal = partResults.reduce((sum, part) => sum + part.total, 0);
 
-      return {
+      lineResults.push({
         lineId: line.id,
         lineName: line.name,
         total: lineTotal,
         parts: partResults,
-      };
-    });
+      });
+    }
+
     const scopeTotal = lineResults.reduce((sum, line) => sum + line.total, 0);
 
-    return {
+    scopeResults.push({
       scopeId: offerScope.scopeId,
       scopeName: scope?.name ?? "Unknown scope",
       total: scopeTotal,
       lines: lineResults,
-    };
-  });
+    });
+  }
+
   const total = scopeResults.reduce((sum, scope) => sum + scope.total, 0);
 
   return {
     id: `run-${offerId}-${Date.now()}`,
     offerId,
-    mtoVersionId: "mto-version-2026-05",
+    mtoVersionId: activeVersion?.id ?? "no-approved-mto-version",
     runAt: new Date().toISOString(),
     status: issues.length > 0 ? "failed" : "current",
     total,

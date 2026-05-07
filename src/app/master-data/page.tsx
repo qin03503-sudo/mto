@@ -16,14 +16,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { materials, mtoVersions, units } from "@/lib/master-data";
-import { mtoRows, parts, scopes } from "@/lib/scopes-lines";
+import { getMaterials, getMtoVersions, getUnits } from "@/lib/master-data";
+import { getMtoRows, getPartsForScope, getScopes } from "@/lib/scopes-lines";
 
 const numberFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 4,
 });
 
-export default function MasterDataPage() {
+export default async function MasterDataPage() {
+  const [materials, mtoVersions, units, scopes, parts, mtoRows] = await Promise.all([
+    getMaterials(),
+    getMtoVersions(),
+    getUnits(),
+    getScopes(),
+    getPartsForScope(),
+    getMtoRows(),
+  ]);
   const activeVersion = mtoVersions.find((version) => version.status === "approved");
 
   return (
@@ -39,9 +47,6 @@ export default function MasterDataPage() {
         <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Material Master</CardTitle>
-            <CardDescription>
-              Default prices copied into every new offer as project material prices.
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="overflow-hidden rounded-2xl border">
@@ -81,9 +86,6 @@ export default function MasterDataPage() {
         <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Scope And Part Catalog</CardTitle>
-            <CardDescription>
-              Parts are constrained by scope to prevent invalid offer line items.
-            </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2">
             {scopes.map((scope) => {
@@ -111,7 +113,7 @@ export default function MasterDataPage() {
         <CardHeader>
           <CardTitle>MTO Master Rows</CardTitle>
           <CardDescription>
-            Active version {activeVersion?.version ?? "not selected"}; calculation uses value multiplied by project material price.
+            Active version {activeVersion?.version ?? "not selected"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -122,7 +124,9 @@ export default function MasterDataPage() {
                   <TableHead>Scope</TableHead>
                   <TableHead>Part</TableHead>
                   <TableHead>Material</TableHead>
+                  <TableHead className="text-right">Qty</TableHead>
                   <TableHead className="text-right">Value</TableHead>
+                  <TableHead>Unit</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -139,7 +143,9 @@ export default function MasterDataPage() {
                         <div className="font-medium">{material?.name ?? "Unknown"}</div>
                         <div className="text-xs text-muted-foreground">{row.description}</div>
                       </TableCell>
+                      <TableCell className="text-right">{numberFormatter.format(row.quantity)}</TableCell>
                       <TableCell className="text-right">{numberFormatter.format(row.value)}</TableCell>
+                      <TableCell>{row.unit || "-"}</TableCell>
                     </TableRow>
                   );
                 })}

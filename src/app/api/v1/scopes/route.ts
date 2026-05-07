@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { scopes } from "@/lib/scopes-lines";
+import { getScopes } from "@/lib/scopes-lines";
 
 export async function GET() {
-  return NextResponse.json({ data: scopes });
+  return NextResponse.json({ data: await getScopes() });
 }

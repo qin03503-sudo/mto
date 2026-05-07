@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -37,9 +36,6 @@ export default async function MaterialPricesPage({
           <CardHeader>
             <div>
               <CardTitle>{offer.name} / Material Prices</CardTitle>
-              <CardDescription>
-                Edit project-specific prices without changing default material prices.
-              </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -54,10 +50,7 @@ export default async function MaterialPricesPage({
 
         <Card>
           <CardHeader>
-            <CardTitle>Pricing state</CardTitle>
-            <CardDescription>
-              Validation and calculation impact for this offer.
-            </CardDescription>
+            <CardTitle>Summary</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <SummaryRow label="Materials" value={summary.total.toString()} />
@@ -66,11 +59,6 @@ export default async function MaterialPricesPage({
             <div className="space-y-2 rounded-xl border bg-muted/50 p-4">
               <div className="text-sm text-muted-foreground">Calculation status</div>
               <CalculationStatusBadge status={offer.calculationStatus} />
-            </div>
-            <div className="rounded-xl border bg-muted/50 p-4 text-sm text-muted-foreground">
-              API ready: <code>GET /api/v1/offers/{id}/material-prices</code> and
-              <code> PUT /api/v1/offers/{id}/material-prices/{"{material_id}"}</code>.
-              PUT validates non-negative prices and returns an outdated calculation state.
             </div>
           </CardContent>
         </Card>

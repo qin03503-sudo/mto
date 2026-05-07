@@ -67,9 +67,6 @@ export default async function OffersPage() {
         <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Offer Workbench</CardTitle>
-            <CardDescription>
-              Search, filter by status, open an offer, and continue pricing work.
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <OffersTable offers={offers} />

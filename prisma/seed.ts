@@ -80,13 +80,13 @@ const parts = [
 ];
 
 const mtoRows = [
-  { id: "mto-feeder-1000-al-profile", scopeId: "scope-1000a-al", partId: "part-feeder-1000", materialId: "mat-al-profile", description: "Aluminum profile body", value: 668916.6986 },
-  { id: "mto-feeder-1000-bolts", scopeId: "scope-1000a-al", partId: "part-feeder-1000", materialId: "mat-bolt-6x20", description: "Connection bolts", value: 12 },
-  { id: "mto-top-off-al-profile", scopeId: "scope-1000a-al", partId: "part-top-off-box-250", materialId: "mat-al-profile", description: "Tap-off enclosure profile", value: 183600 },
-  { id: "mto-elbow-al-profile", scopeId: "scope-1000a-al", partId: "part-elbow-1000", materialId: "mat-al-profile", description: "Elbow aluminum profile", value: 123333.3333 },
-  { id: "mto-feeder-1600-al-profile", scopeId: "scope-1600a-al", partId: "part-feeder-1600", materialId: "mat-al-profile", description: "1600A aluminum body", value: 995833.3333 },
-  { id: "mto-plug-in-1600-insulator", scopeId: "scope-1600a-al", partId: "part-plug-in-1600", materialId: "mat-insulator", description: "Plug-in support insulators", value: 1305084.7458 },
-  { id: "mto-feeder-2500-cu-copper", scopeId: "scope-2500a-cu", partId: "part-feeder-2500-cu", materialId: "mat-copper-bar", description: "Copper conductor bars", value: 408888.8889 },
+  { id: "mto-feeder-1000-al-profile", scopeId: "scope-1000a-al", partId: "part-feeder-1000", materialId: "mat-al-profile", description: "Aluminum profile body", quantity: 1, value: 668916.6986, unit: "Kg" },
+  { id: "mto-feeder-1000-bolts", scopeId: "scope-1000a-al", partId: "part-feeder-1000", materialId: "mat-bolt-6x20", description: "Connection bolts", quantity: 12, value: 12, unit: "PCS" },
+  { id: "mto-top-off-al-profile", scopeId: "scope-1000a-al", partId: "part-top-off-box-250", materialId: "mat-al-profile", description: "Tap-off enclosure profile", quantity: 1, value: 183600, unit: "Kg" },
+  { id: "mto-elbow-al-profile", scopeId: "scope-1000a-al", partId: "part-elbow-1000", materialId: "mat-al-profile", description: "Elbow aluminum profile", quantity: 1, value: 123333.3333, unit: "Kg" },
+  { id: "mto-feeder-1600-al-profile", scopeId: "scope-1600a-al", partId: "part-feeder-1600", materialId: "mat-al-profile", description: "1600A aluminum body", quantity: 1, value: 995833.3333, unit: "Kg" },
+  { id: "mto-plug-in-1600-insulator", scopeId: "scope-1600a-al", partId: "part-plug-in-1600", materialId: "mat-insulator", description: "Plug-in support insulators", quantity: 1, value: 1305084.7458, unit: "PCS" },
+  { id: "mto-feeder-2500-cu-copper", scopeId: "scope-2500a-cu", partId: "part-feeder-2500-cu", materialId: "mat-copper-bar", description: "Copper conductor bars", quantity: 1, value: 408888.8889, unit: "Kg" },
 ];
 
 const mtoVersions = [

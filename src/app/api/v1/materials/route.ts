@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { materials } from "@/lib/master-data";
+import { getMaterials } from "@/lib/master-data";
 
 export async function GET() {
-  return NextResponse.json({ data: materials });
+  return NextResponse.json({ data: await getMaterials() });
 }

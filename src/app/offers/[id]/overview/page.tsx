@@ -68,10 +68,7 @@ export default async function OfferOverviewPage({
 
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Workflow State</CardTitle>
-            <CardDescription>
-              Complete these before calculation.
-            </CardDescription>
+            <CardTitle>Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <WorkflowCard

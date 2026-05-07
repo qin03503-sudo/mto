@@ -58,9 +58,6 @@ export default async function CalculationPage({
             <CardHeader className="gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <CardTitle>{offer.name} / Calculation</CardTitle>
-                <CardDescription>
-                  Results are grouped by scope, line, and part. Each recalculation should create a new auditable run.
-                </CardDescription>
               </div>
               <CalculationStatusBadge status={offer.calculationStatus} />
             </CardHeader>
@@ -195,10 +192,7 @@ export default async function CalculationPage({
 
         <Card className="h-fit">
           <CardHeader>
-            <CardTitle>Run snapshot</CardTitle>
-            <CardDescription>
-              Stored run metadata for auditability.
-            </CardDescription>
+            <CardTitle>Run</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <SummaryRow label="Run ID" value={calculation.id} />
@@ -218,9 +212,6 @@ export default async function CalculationPage({
               >
                 {calculation.status}
               </Badge>
-            </div>
-            <div className="rounded-xl border bg-muted/50 p-4 text-sm text-muted-foreground">
-              API ready: <code>POST /api/v1/offers/{id}/calculate</code> and <code>GET /api/v1/offers/{id}/calculation-results</code>.
             </div>
           </CardContent>
         </Card>

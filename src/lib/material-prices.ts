@@ -10,76 +10,6 @@ export type MaterialPrice = {
   isOverridden: boolean;
 };
 
-export const baseMaterialPrices: MaterialPrice[] = [
-  {
-    materialId: "mat-al-profile",
-    material: "Al profile",
-    dimension: "Extruded body",
-    unit: "Kg",
-    defaultPrice: 1000,
-    projectPrice: 1200,
-    isOverridden: true,
-  },
-  {
-    materialId: "mat-bolt-6x20",
-    material: "Bolt 6x20",
-    dimension: "Galvanized",
-    unit: "PCS",
-    defaultPrice: 50,
-    projectPrice: 50,
-    isOverridden: false,
-  },
-  {
-    materialId: "mat-copper-bar",
-    material: "Copper bar",
-    dimension: "Tinned copper",
-    unit: "Kg",
-    defaultPrice: 4500,
-    projectPrice: 4500,
-    isOverridden: false,
-  },
-  {
-    materialId: "mat-insulator",
-    material: "Insulator",
-    dimension: "Support block",
-    unit: "PCS",
-    defaultPrice: 320,
-    projectPrice: 295,
-    isOverridden: true,
-  },
-  {
-    materialId: "mat-paint",
-    material: "Powder coating",
-    dimension: "RAL finish",
-    unit: "m2",
-    defaultPrice: 180,
-    projectPrice: null,
-    isOverridden: false,
-  },
-];
-
-export const seedProjectPrices: Record<string, MaterialPrice[]> = {
-  "off-2026-001": baseMaterialPrices.map((price) => ({ ...price })),
-  "off-2026-002": baseMaterialPrices.map((price) => ({
-    ...price,
-    projectPrice:
-      price.materialId === "mat-al-profile"
-        ? 1100
-        : price.materialId === "mat-copper-bar"
-          ? 4700
-          : price.projectPrice,
-    isOverridden:
-      price.materialId === "mat-al-profile" ||
-      price.materialId === "mat-copper-bar" ||
-      price.isOverridden,
-  })),
-  "off-2026-003": baseMaterialPrices.map((price) => ({
-    ...price,
-    projectPrice: price.materialId === "mat-paint" ? 180 : price.projectPrice,
-    isOverridden: price.materialId === "mat-paint" ? false : price.isOverridden,
-  })),
-};
-
 function toMaterialPrice(price: {
   materialId: string;
   defaultPrice: number;
@@ -105,18 +35,22 @@ function toMaterialPrice(price: {
 export async function initializeProjectMaterialPrices(
   offerId: string
 ): Promise<MaterialPrice[]> {
+  const materials = await prisma.material.findMany({ orderBy: { id: "asc" } });
+
   await prisma.projectMaterialPrice.deleteMany({ where: { offerId } });
 
-  await prisma.projectMaterialPrice.createMany({
-    data: baseMaterialPrices.map((price) => ({
-      id: `${offerId}-${price.materialId}`,
-      offerId,
-      materialId: price.materialId,
-      defaultPrice: price.defaultPrice,
-      projectPrice: price.defaultPrice,
-      isOverridden: false,
-    })),
-  });
+  if (materials.length > 0) {
+    await prisma.projectMaterialPrice.createMany({
+      data: materials.map((material) => ({
+        id: `${offerId}-${material.id}`,
+        offerId,
+        materialId: material.id,
+        defaultPrice: material.defaultPrice ?? 0,
+        projectPrice: material.defaultPrice,
+        isOverridden: false,
+      })),
+    });
+  }
 
   return getMaterialPricesForOffer(offerId);
 }

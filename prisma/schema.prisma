@@ -70,7 +70,9 @@ model MtoRow {
   partId      String
   materialId  String
   description String
+  quantity    Float    @default(1)
   value       Float
+  unit        String   @default("")
   scope       Scope    @relation(fields: [scopeId], references: [id])
   part        Part     @relation(fields: [partId], references: [id])
   material    Material @relation(fields: [materialId], references: [id])

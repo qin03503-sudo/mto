@@ -38,11 +38,9 @@ import { getOfferById } from "@/lib/offers";
 import {
   getOfferScopes,
   getPartUnitPrice,
-  getPartById,
   getPartsForScope,
-  getScopeById,
   getScopeLineSummary,
-  scopes,
+  getScopes,
 } from "@/lib/scopes-lines";
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
@@ -68,12 +66,25 @@ export default async function ScopesLinesPage({
 
   const offerScopes = await getOfferScopes(id);
   const summary = await getScopeLineSummary(id);
+  const allScopes = await getScopes();
+  const scopeById = new Map(allScopes.map((scope) => [scope.id, scope]));
+  const partsByScopeEntries = await Promise.all(
+    offerScopes.map(async (offerScope) => [
+      offerScope.scopeId,
+      await getPartsForScope(offerScope.scopeId),
+    ] as const)
+  );
+  const partsByScope = new Map(partsByScopeEntries);
+  const partById = new Map(
+    partsByScopeEntries.flatMap(([, parts]) => parts.map((part) => [part.id, part] as const))
+  );
   const selectedScopeIds = new Set(offerScopes.map((scope) => scope.scopeId));
-  const availableScopes = scopes.filter((scope) => !selectedScopeIds.has(scope.id));
+  const availableScopes = allScopes.filter((scope) => !selectedScopeIds.has(scope.id));
   const unitPriceEntries = await Promise.all(
     offerScopes.flatMap((offerScope) => {
+      const validParts = partsByScope.get(offerScope.scopeId) ?? [];
       const partIds = new Set([
-        ...getPartsForScope(offerScope.scopeId).map((part) => part.id),
+        ...validParts.map((part) => part.id),
         ...offerScope.lines.flatMap((line) => line.parts.map((part) => part.partId)),
       ]);
 
@@ -92,9 +103,6 @@ export default async function ScopesLinesPage({
           <Card>
             <CardHeader>
               <CardTitle>{offer.name} / Scopes and Lines</CardTitle>
-              <CardDescription>
-                Select valid scopes, create lines, and add only scope-valid parts with positive quantities.
-              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {error ? (
@@ -103,7 +111,7 @@ export default async function ScopesLinesPage({
                 </div>
               ) : null}
               <div className="flex flex-wrap gap-2">
-                {scopes.map((scope) => (
+                {allScopes.map((scope) => (
                   <Badge
                     key={scope.id}
                     variant={selectedScopeIds.has(scope.id) ? "default" : "outline"}
@@ -155,8 +163,8 @@ export default async function ScopesLinesPage({
             </Card>
           ) : (
             offerScopes.map((offerScope) => {
-              const scope = getScopeById(offerScope.scopeId);
-              const validParts = getPartsForScope(offerScope.scopeId);
+              const scope = scopeById.get(offerScope.scopeId);
+              const validParts = partsByScope.get(offerScope.scopeId) ?? [];
 
               return (
                 <Card key={offerScope.id}>
@@ -251,7 +259,7 @@ export default async function ScopesLinesPage({
                             </TableHeader>
                             <TableBody>
                               {line.parts.map((linePart) => {
-                                const part = getPartById(linePart.partId);
+                                const part = partById.get(linePart.partId);
                                 const isValidForScope = part?.scopeId === offerScope.scopeId;
                                 const unitPrice = unitPrices.get(`${offerScope.scopeId}:${linePart.partId}`) ?? 0;
                                 const lineTotal = unitPrice * linePart.qty;
@@ -309,10 +317,7 @@ export default async function ScopesLinesPage({
 
         <Card className="h-fit">
           <CardHeader>
-            <CardTitle>Validation state</CardTitle>
-            <CardDescription>
-              Calculation pre-checks from the docs.
-            </CardDescription>
+            <CardTitle>Summary</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <SummaryRow label="Selected scopes" value={summary.scopes.toString()} />
@@ -323,10 +328,6 @@ export default async function ScopesLinesPage({
               <div className="text-sm text-muted-foreground">Calculation status</div>
               <CalculationStatusBadge status={offer.calculationStatus} />
             </div>
-            <div className="rounded-xl border bg-muted/50 p-4 text-sm text-muted-foreground">
-              API ready: <code>GET /api/v1/scopes</code>, <code>GET /api/v1/parts?scope_id=...</code>, and <code>GET /api/v1/offers/{id}/scopes-lines</code>.
-            </div>
-            <Input placeholder="Fast entry placeholder: line name or part" />
           </CardContent>
         </Card>
       </section>
