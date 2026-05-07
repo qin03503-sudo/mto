@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Offer {
+  id                String                 @id
+  name              String
+  offerNumber       String                 @unique
+  type              String
+  inputDate         String
+  closeDate         String
+  owner             String
+  status            String
+  calculationStatus String
+  description       String
+  scopes            Int                    @default(0)
+  lines             Int                    @default(0)
+  total             Float                  @default(0)
+  materialPrices    ProjectMaterialPrice[]
+  offerScopes       OfferScope[]
+  calculationRuns   CalculationRun[]
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+}
+
+model Unit {
+  id        String     @id
+  name      String
+  symbol    String
+  materials Material[]
+}
+
+model Material {
+  id            String                 @id
+  name          String
+  dimension     String
+  unitId        String
+  defaultPrice  Float?
+  unit          Unit                   @relation(fields: [unitId], references: [id])
+  mtoRows       MtoRow[]
+  projectPrices ProjectMaterialPrice[]
+}
+
+model Scope {
+  id          String       @id
+  name        String
+  description String
+  parts       Part[]
+  mtoRows     MtoRow[]
+  offerScopes OfferScope[]
+}
+
+model Part {
+  id            String          @id
+  scopeId       String
+  name          String
+  scope         Scope           @relation(fields: [scopeId], references: [id])
+  mtoRows       MtoRow[]
+  offerLinePart OfferLinePart[]
+}
+
+model MtoRow {
+  id          String   @id
+  scopeId     String
+  partId      String
+  materialId  String
+  description String
+  value       Float
+  scope       Scope    @relation(fields: [scopeId], references: [id])
+  part        Part     @relation(fields: [partId], references: [id])
+  material    Material @relation(fields: [materialId], references: [id])
+}
+
+model MtoVersion {
+  id        String   @id
+  version   String
+  importedAt String
+  status    String
+}
+
+model ProjectMaterialPrice {
+  id           String   @id
+  offerId      String
+  materialId   String
+  defaultPrice Float
+  projectPrice Float?
+  isOverridden Boolean  @default(false)
+  offer        Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  material     Material @relation(fields: [materialId], references: [id])
+
+  @@unique([offerId, materialId])
+}
+
+model OfferScope {
+  id      String      @id
+  offerId String
+  scopeId String
+  offer   Offer       @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  scope   Scope       @relation(fields: [scopeId], references: [id])
+  lines   OfferLine[]
+
+  @@unique([offerId, scopeId])
+}
+
+model OfferLine {
+  id           String          @id
+  offerScopeId String
+  name         String
+  offerScope   OfferScope      @relation(fields: [offerScopeId], references: [id], onDelete: Cascade)
+  parts        OfferLinePart[]
+}
+
+model OfferLinePart {
+  id      String    @id
+  lineId  String
+  partId  String
+  qty     Float
+  line    OfferLine @relation(fields: [lineId], references: [id], onDelete: Cascade)
+  part    Part      @relation(fields: [partId], references: [id])
+}
+
+model CalculationRun {
+  id           String   @id
+  offerId      String
+  mtoVersionId String
+  runAt        String
+  status       String
+  total        Float
+  payload      String
+  offer        Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+}
