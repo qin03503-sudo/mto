@@ -18,6 +18,7 @@ import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { getDirection } from "@/i18n/config";
 import { useI18n, useLocalizedPath } from "@/i18n/client";
 import {
   Sidebar,
@@ -39,12 +40,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { dictionary, locale } = useI18n();
   const localizePath = useLocalizedPath();
   const pathname = usePathname();
+  const direction = getDirection(locale);
+  const sidebarSide = direction === "rtl" ? "right" : "left";
 
   const navItems = [
     { href: "/offers", label: dictionary.shell.offers, icon: LayoutDashboard },
     { href: "/offers/new", label: dictionary.shell.newOffer, icon: FilePlus2 },
-    { href: "/scopes", label: "Scopes", icon: Blocks },
-    { href: "/parts", label: "Parts", icon: FileStack },
+    { href: "/scopes", label: dictionary.shell.scopes, icon: Blocks },
+    { href: "/parts", label: dictionary.shell.parts, icon: FileStack },
     { href: "/dashboard", label: dictionary.shell.dashboard, icon: BarChart3 },
     { href: "/offers/inbox", label: dictionary.shell.managementInbox, icon: Inbox },
     { href: "/offers/stale", label: dictionary.shell.managementStale, icon: AlertOctagon },
@@ -60,7 +63,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <Sidebar>
+      <Sidebar side={sidebarSide} dir={direction}>
         <SidebarHeader className="p-4 border-b border-sidebar-border">
           <Link href={localizePath("/offers")} className="flex items-center gap-3 group">
             <div className="flex items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground size-8">
@@ -75,7 +78,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>Menu</SidebarGroupLabel>
+            <SidebarGroupLabel>{dictionary.shell.menu}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {navItems.map((item) => {
@@ -84,7 +87,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
                   return (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton isActive={isActive} tooltip={item.label}>
+                      <SidebarMenuButton
+                        isActive={isActive}
+                        tooltip={{ children: item.label, side: sidebarSide === "right" ? "left" : "right" }}
+                      >
                         <Link href={localizePath(item.href)} className="flex items-center gap-2 w-full">
                           <Icon className="w-4 h-4" />
                           <span>{item.label}</span>
@@ -102,7 +108,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="font-medium uppercase tracking-widest mb-2 opacity-50">{dictionary.shell.workspace}</div>
           <div className="space-y-1">
             <div className="flex justify-between"><span>{dictionary.shell.storage}</span><span>SQLite</span></div>
-            <div className="flex justify-between"><span>{dictionary.shell.pricing}</span><span>MTO Value</span></div>
+            <div className="flex justify-between"><span>{dictionary.shell.pricing}</span><span>{dictionary.shell.mtoValue}</span></div>
           </div>
         </SidebarFooter>
       </Sidebar>
@@ -119,8 +125,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-4">
             <LanguageSwitcher />
             {/* Adding 'asChild' to Shadcn button to properly wrap Link and maintain standard prop usage */}
-            <Button size="sm" className="hidden sm:flex" nativeButton={false} render={<Link href={localizePath("/offers/new")} />}>
-              <FilePlus2 className="w-4 h-4 mr-2" />
+            <Button size="sm" className="hidden sm:flex items-center gap-2" nativeButton={false} render={<Link href={localizePath("/offers/new")} />}>
+              <FilePlus2 className="w-4 h-4" />
               {dictionary.shell.newOffer}
             </Button>
           </div>
