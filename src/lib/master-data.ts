@@ -12,6 +12,7 @@ export type Material = {
   dimension: string;
   unitId: string;
   defaultPrice: number | null;
+  defaultCurrency: string;
 };
 
 export type MtoVersion = {

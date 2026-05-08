@@ -1,6 +1,6 @@
 import { test, describe } from "node:test";
 import assert from "node:assert";
-import { buildCreatedOffer, type CreateOfferInput } from "./offer-utils.ts";
+import { buildCreatedOffer, type CreateOfferInput } from "./offer-utils";
 
 describe("buildCreatedOffer", () => {
   const baseInput: CreateOfferInput = {

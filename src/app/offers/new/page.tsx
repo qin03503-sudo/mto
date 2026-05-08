@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { priceCurrencies } from "@/lib/currency";
 import { getDictionary } from "@/i18n/server";
 
 export default async function NewOfferPage({
@@ -43,7 +44,7 @@ export default async function NewOfferPage({
                 <Label htmlFor="name">{dictionary.offers.offerName}</Label>
                 <Input id="name" name="name" placeholder={dictionary.offers.projectPlaceholder} required />
               </div>
-              <div className="grid gap-5 sm:grid-cols-2">
+              <div className="grid gap-5 sm:grid-cols-3">
                 <div className="grid gap-2">
                   <Label htmlFor="offer_number">{dictionary.offers.offerNumber}</Label>
                   <Input
@@ -62,6 +63,19 @@ export default async function NewOfferPage({
                     <SelectContent>
                       <SelectItem value="standard">{dictionary.offers.standard}</SelectItem>
                       <SelectItem value="custom">{dictionary.offers.custom}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="currency">{dictionary.common.currency}</Label>
+                  <Select name="currency" defaultValue="USD">
+                    <SelectTrigger id="currency" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {priceCurrencies.map((c) => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

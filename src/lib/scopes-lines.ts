@@ -1,5 +1,5 @@
 import { getMaterialPricesForOffer } from "@/lib/material-prices";
-import { getOfferById } from "@/lib/offers";
+import { getOfferById, updateOffer } from "@/lib/offers";
 import { prisma } from "@/lib/prisma";
 import { convertMoney } from "@/lib/exchange-rates";
 import { defaultCurrency, normalizeCurrency } from "@/lib/currency";

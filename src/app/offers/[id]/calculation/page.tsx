@@ -134,10 +134,10 @@ export default async function CalculationPage({
                               </TableCell>
                               <TableCell className="text-right">{part.qty}</TableCell>
                               <TableCell className="hidden md:table-cell text-right">
-                                {formatMoney(part.unitPrice)}
+                                {formatMoney(part.unitPrice, calcCurrency, locale, 0)}
                               </TableCell>
                               <TableCell className="text-right font-medium">
-                                {formatMoney(part.total)}
+                                {formatMoney(part.total, calcCurrency, locale, 0)}
                               </TableCell>
                             </TableRow>
                             {part.details.length > 0 ? (
@@ -165,10 +165,10 @@ export default async function CalculationPage({
                                              {dictionary.common.value} {numberFormatter.format(detail.value)}
                                           </div>
                                           <div className="md:text-right">
-                                            {formatMoney(detail.unitPrice)}
+                                            {formatMoney(detail.unitPrice, calcCurrency, locale, 0)}
                                           </div>
                                           <div className="font-medium md:text-right">
-                                            {formatMoney(detail.total)}
+                                            {formatMoney(detail.total, calcCurrency, locale, 0)}
                                           </div>
                                         </div>
                                       ))}
@@ -196,7 +196,7 @@ export default async function CalculationPage({
             <SummaryRow label={dictionary.calculation.runId} value={calculation.id} />
             <SummaryRow label={dictionary.calculation.mtoVersion} value={calculation.mtoVersionId} />
             <SummaryRow label={dictionary.calculation.runTime} value={calculation.runAt} />
-            <SummaryRow label={dictionary.calculation.offerTotal} value={formatMoney(calculation.total)} />
+            <SummaryRow label={dictionary.calculation.offerTotal} value={formatMoney(calculation.total, calcCurrency, locale, 0)} />
             <div className="flex items-center justify-between rounded-xl border bg-muted/40 p-4">
               <span className="text-sm text-muted-foreground">{dictionary.calculation.runStatus}</span>
               <Badge

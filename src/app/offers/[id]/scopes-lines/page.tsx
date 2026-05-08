@@ -34,6 +34,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatMoney } from "@/lib/currency";
 import { getOfferById } from "@/lib/offers";
 import {
   getOfferScopes,
@@ -55,11 +56,6 @@ export default async function ScopesLinesPage({
   const { error } = await searchParams;
   const locale = await getLocale();
   const dictionary = await getDictionary();
-  const currencyFormatter = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  });
   const offer = await getOfferById(id);
 
   if (!offer) {
@@ -284,10 +280,10 @@ export default async function ScopesLinesPage({
                                       )}
                                     </TableCell>
                                     <TableCell className="hidden md:table-cell text-right">
-                                      {currencyFormatter.format(unitPrice)}
+                                      {formatMoney(unitPrice, offer.currency, locale, 0)}
                                     </TableCell>
                                     <TableCell className="text-right font-medium">
-                                      {currencyFormatter.format(lineTotal)}
+                                      {formatMoney(lineTotal, offer.currency, locale, 0)}
                                     </TableCell>
                                   </TableRow>
                                 );
@@ -304,7 +300,7 @@ export default async function ScopesLinesPage({
                           <div key={part.id} className="rounded-lg border bg-background p-3 text-sm">
                             <div className="font-medium">{part.name}</div>
                             <div className="text-muted-foreground">
-                              {currencyFormatter.format(unitPrices.get(`${offerScope.scopeId}:${part.id}`) ?? 0)} {dictionary.common.unitPrice}
+                              {formatMoney(unitPrices.get(`${offerScope.scopeId}:${part.id}`) ?? 0, offer.currency, locale, 0)} {dictionary.common.unitPrice}
                             </div>
                           </div>
                         ))}

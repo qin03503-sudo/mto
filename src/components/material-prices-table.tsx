@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatMoney, isPriceCurrency, priceCurrencies } from "@/lib/currency";
+import { formatMoney, isPriceCurrency, priceCurrencies, type PriceCurrency } from "@/lib/currency";
 import type { MaterialPrice } from "@/lib/material-prices";
 
 export function MaterialPricesTable({
@@ -38,10 +38,10 @@ export function MaterialPricesTable({
       ])
     )
   );
-  const [draftCurrencies, setDraftCurrencies] = useState(() =>
+  const [draftCurrencies, setDraftCurrencies] = useState<Record<string, PriceCurrency>>(() =>
     Object.fromEntries(
       prices.map((price) => [price.materialId, price.projectCurrency])
-    )
+    ) as Record<string, PriceCurrency>
   );
   const [savingMaterialId, setSavingMaterialId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -90,8 +90,9 @@ export function MaterialPricesTable({
       data?: MaterialPrice;
       error?: string;
     };
+    const responseData = payload.data;
 
-    if (!response.ok || !payload.data) {
+    if (!response.ok || !responseData) {
       setError(payload.error ?? dictionary.materialPrices.couldNotSave);
       setSavingMaterialId(null);
       return;
@@ -99,13 +100,12 @@ export function MaterialPricesTable({
 
     setRows((currentRows) =>
       currentRows.map((row) =>
-        row.materialId === materialId ? payload.data as MaterialPrice : row
+        row.materialId === materialId ? responseData as MaterialPrice : row
       )
     );
-    setDraftCurrencies((current) => ({
-      ...current,
-      [materialId]: payload.data.projectCurrency,
-    }));
+    setDraftCurrencies((current) => Object.assign({}, current, {
+      [materialId]: responseData.projectCurrency,
+    }) as Record<string, PriceCurrency>);
     setSavingMaterialId(null);
     startTransition(() => router.refresh());
   }
@@ -190,12 +190,10 @@ export function MaterialPricesTable({
                         aria-label={dictionary.common.currency}
                         className="h-8 rounded-md border border-input bg-transparent px-2 text-sm"
                         value={draftCurrencies[price.materialId] ?? price.projectCurrency}
-                        onChange={(event) =>
-                          setDraftCurrencies((current) => ({
-                            ...current,
-                            [price.materialId]: event.target.value,
-                          }))
-                        }
+                        onChange={(event) => {
+                          const currency = event.target.value as PriceCurrency;
+                          setDraftCurrencies((current) => ({...current, [price.materialId]: currency}) as Record<string, PriceCurrency>);
+                        }}
                       >
                         {priceCurrencies.map((currency) => (
                           <option key={currency} value={currency}>

@@ -9,11 +9,11 @@ const units = [
 ];
 
 const materials = [
-  { id: "mat-al-profile", name: "Al profile", dimension: "Extruded body", unitId: "unit-kg", defaultPrice: 1000 },
-  { id: "mat-bolt-6x20", name: "Bolt 6x20", dimension: "Galvanized", unitId: "unit-pcs", defaultPrice: 50 },
-  { id: "mat-copper-bar", name: "Copper bar", dimension: "Tinned copper", unitId: "unit-kg", defaultPrice: 4500 },
-  { id: "mat-insulator", name: "Insulator", dimension: "Support block", unitId: "unit-pcs", defaultPrice: 320 },
-  { id: "mat-paint", name: "Powder coating", dimension: "RAL finish", unitId: "unit-m2", defaultPrice: null },
+  { id: "mat-al-profile", name: "Al profile", dimension: "Extruded body", unitId: "unit-kg", defaultPrice: 1000, defaultCurrency: "USD" },
+  { id: "mat-bolt-6x20", name: "Bolt 6x20", dimension: "Galvanized", unitId: "unit-pcs", defaultPrice: 50, defaultCurrency: "USD" },
+  { id: "mat-copper-bar", name: "Copper bar", dimension: "Tinned copper", unitId: "unit-kg", defaultPrice: 4500, defaultCurrency: "USD" },
+  { id: "mat-insulator", name: "Insulator", dimension: "Support block", unitId: "unit-pcs", defaultPrice: 320, defaultCurrency: "USD" },
+  { id: "mat-paint", name: "Powder coating", dimension: "RAL finish", unitId: "unit-m2", defaultPrice: null, defaultCurrency: "USD" },
 ];
 
 const offers = [
@@ -28,6 +28,7 @@ const offers = [
     status: "pricing",
     calculationStatus: "outdated",
     description: "Busduct package for the metro line expansion tender.",
+    currency: "USD",
     scopes: 2,
     lines: 2,
     total: 428500,
@@ -43,6 +44,7 @@ const offers = [
     status: "pricing",
     calculationStatus: "not_calculated",
     description: "Custom package requiring hospital tower material overrides.",
+    currency: "USD",
     scopes: 1,
     lines: 1,
     total: 184200,
@@ -58,6 +60,7 @@ const offers = [
     status: "ready",
     calculationStatus: "current",
     description: "Ready customer output for airport service building review.",
+    currency: "USD",
     scopes: 0,
     lines: 0,
     total: 612900,
@@ -154,7 +157,9 @@ async function main() {
           offerId: offer.id,
           materialId: material.id,
           defaultPrice,
+          defaultCurrency: "USD",
           projectPrice,
+          projectCurrency: "USD",
           isOverridden: projectPrice !== null && projectPrice !== defaultPrice,
         };
       }),
