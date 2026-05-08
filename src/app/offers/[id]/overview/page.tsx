@@ -51,7 +51,14 @@ export default async function OfferOverviewPage({
             <Info label={dictionary.common.owner} value={offer.owner} />
             <Info label={dictionary.common.inputDate} value={offer.inputDate} />
             <Info label={dictionary.common.closeDate} value={offer.closeDate} />
-            <Info label={dictionary.common.total} value={formatMoney(offer.total, offer.currency, locale, 0)} />
+            <Info
+              label={dictionary.common.total}
+              value={
+                offer.calculationStatus === "current"
+                  ? formatMoney(offer.total, offer.currency, locale, 0)
+                  : "—"
+              }
+            />
             <Info label={dictionary.overview.configuredScopeLine} value={`${scopeSummary.scopes} ${dictionary.offers.scopesCount} / ${scopeSummary.lines} ${dictionary.offers.linesCount}`} />
             <div className="space-y-1">
               <div className="text-sm text-muted-foreground">{dictionary.overview.offerStatus}</div>

@@ -9,10 +9,11 @@ import { updateOffer } from "@/lib/offers";
 export async function calculateOfferAction(offerId: string) {
   const run = await calculateOffer(offerId);
 
-  await updateOffer(offerId, {
-    calculationStatus: run.status,
-    total: run.total,
-  });
+  await updateOffer(offerId,
+    run.status === "current"
+      ? { calculationStatus: run.status, total: run.total }
+      : { calculationStatus: run.status }
+  );
 
   revalidatePath(`/offers/${offerId}/calculation`);
   revalidatePath(`/offers/${offerId}/overview`);

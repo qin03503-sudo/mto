@@ -115,7 +115,9 @@ export function OffersTable({ offers }: { offers: Offer[] }) {
                     {offer.closeDate}
                   </TableCell>
                   <TableCell className="text-right font-medium">
-                    {formatMoney(offer.total, offer.currency, locale, 0)}
+                    {offer.calculationStatus === "current"
+                      ? formatMoney(offer.total, offer.currency, locale, 0)
+                      : "—"}
                   </TableCell>
                 </TableRow>
               ))
