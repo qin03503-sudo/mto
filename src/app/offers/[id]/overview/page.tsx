@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Calculator, Layers3, PackageCheck } from "lucide-react";
 
 import { AppShell } from "@/components/app-shell";
+import { OfferFlowProgress } from "@/components/offer-flow-progress";
 import {
   CalculationStatusBadge,
   OfferStatusBadge,
@@ -18,6 +19,7 @@ import { formatMoney } from "@/lib/currency";
 import { getOfferById } from "@/lib/offers";
 import { getMaterialPriceSummary } from "@/lib/material-prices";
 import { getScopeLineSummary } from "@/lib/scopes-lines";
+import { getOfferFlowState } from "@/lib/offer-flow";
 import { getDictionary, getLocale } from "@/i18n/server";
 
 export default async function OfferOverviewPage({
@@ -36,6 +38,7 @@ export default async function OfferOverviewPage({
 
   const materialSummary = await getMaterialPriceSummary(id);
   const scopeSummary = await getScopeLineSummary(id);
+  const flow = await getOfferFlowState(id);
 
   return (
     <AppShell>
@@ -71,31 +74,39 @@ export default async function OfferOverviewPage({
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle>{dictionary.overview.actions}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <WorkflowCard
-              href={`/offers/${offer.id}/material-prices`}
-              icon={<PackageCheck className="size-4" />}
-              label={dictionary.overview.materialPrices}
-              detail={dictionary.overview.materialPricesDetail.replace("{unresolved}", materialSummary.unresolved.toString()).replace("{overridden}", materialSummary.overridden.toString())}
-            />
-            <WorkflowCard
-              href={`/offers/${offer.id}/scopes-lines`}
-              icon={<Layers3 className="size-4" />}
-              label={dictionary.overview.scopesAndLines}
-              detail={dictionary.overview.scopesAndLinesDetail.replace("{parts}", scopeSummary.parts.toString())}
-            />
-            <WorkflowCard
-              href={`/offers/${offer.id}/calculation`}
-              icon={<Calculator className="size-4" />}
-              label={dictionary.offers.calculation}
-              detail={dictionary.overview.calculationDetail.replace("{status}", dictionary.statuses[offer.calculationStatus])}
-            />
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle>{dictionary.overview.actions}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <WorkflowCard
+                href={`/offers/${offer.id}/material-prices`}
+                icon={<PackageCheck className="size-4" />}
+                label={dictionary.overview.materialPrices}
+                detail={dictionary.overview.materialPricesDetail.replace("{unresolved}", materialSummary.unresolved.toString()).replace("{overridden}", materialSummary.overridden.toString())}
+              />
+              <WorkflowCard
+                href={`/offers/${offer.id}/scopes-lines`}
+                icon={<Layers3 className="size-4" />}
+                label={dictionary.overview.scopesAndLines}
+                detail={dictionary.overview.scopesAndLinesDetail.replace("{parts}", scopeSummary.parts.toString())}
+              />
+              <WorkflowCard
+                href={`/offers/${offer.id}/calculation`}
+                icon={<Calculator className="size-4" />}
+                label={dictionary.offers.calculation}
+                detail={dictionary.overview.calculationDetail.replace("{status}", dictionary.statuses[offer.calculationStatus])}
+              />
+            </CardContent>
+          </Card>
+          <OfferFlowProgress
+            offerId={id}
+            currentStep="overview"
+            completed={flow.completed}
+            dictionary={dictionary.offerFlow}
+          />
+        </div>
       </section>
     </AppShell>
   );

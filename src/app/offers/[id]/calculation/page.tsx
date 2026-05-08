@@ -4,6 +4,7 @@ import { Fragment } from "react";
 
 import { calculateOfferAction } from "@/app/offers/[id]/calculation/actions";
 import { AppShell } from "@/components/app-shell";
+import { OfferFlowProgress } from "@/components/offer-flow-progress";
 import { CalculationStatusBadge } from "@/components/offer-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ import {
 } from "@/components/ui/table";
 import { formatMoney } from "@/lib/currency";
 import { getCalculationResults } from "@/lib/calculation";
+import { getOfferFlowState } from "@/lib/offer-flow";
 import { getOfferById } from "@/lib/offers";
 import { getDictionary, getLocale } from "@/i18n/server";
 
@@ -45,6 +47,7 @@ export default async function CalculationPage({
   }
 
   const calculation = await getCalculationResults(id);
+  const flow = await getOfferFlowState(id);
   const canCalculate = calculation.issues.length === 0;
   const calcCurrency = "currency" in calculation ? calculation.currency : offer.currency;
 
@@ -188,6 +191,7 @@ export default async function CalculationPage({
           ))}
         </div>
 
+        <div className="space-y-6">
         <Card className="h-fit">
           <CardHeader>
             <CardTitle>{dictionary.calculation.run}</CardTitle>
@@ -213,6 +217,8 @@ export default async function CalculationPage({
             </div>
           </CardContent>
         </Card>
+        <OfferFlowProgress offerId={id} currentStep="calculation" completed={flow.completed} dictionary={dictionary.offerFlow} />
+        </div>
       </section>
     </AppShell>
   );

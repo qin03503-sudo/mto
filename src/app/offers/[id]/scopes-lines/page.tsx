@@ -7,6 +7,7 @@ import {
   addScopeAction,
 } from "@/app/offers/[id]/scopes-lines/actions";
 import { AppShell } from "@/components/app-shell";
+import { OfferFlowProgress } from "@/components/offer-flow-progress";
 import { CalculationStatusBadge } from "@/components/offer-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ import {
   getScopeLineSummary,
   getScopes,
 } from "@/lib/scopes-lines";
+import { getOfferFlowState } from "@/lib/offer-flow";
 import { getDictionary, getLocale } from "@/i18n/server";
 
 export default async function ScopesLinesPage({
@@ -93,6 +95,7 @@ export default async function ScopesLinesPage({
     })
   );
   const unitPrices = new Map(unitPriceEntries);
+  const flow = await getOfferFlowState(id);
 
   return (
     <AppShell>
@@ -313,6 +316,7 @@ export default async function ScopesLinesPage({
           )}
         </div>
 
+        <div className="space-y-6">
         <Card className="h-fit">
           <CardHeader>
             <CardTitle>{dictionary.common.summary}</CardTitle>
@@ -328,6 +332,8 @@ export default async function ScopesLinesPage({
             </div>
           </CardContent>
         </Card>
+        <OfferFlowProgress offerId={id} currentStep="scopes-lines" completed={flow.completed} dictionary={dictionary.offerFlow} />
+        </div>
       </section>
     </AppShell>
   );
