@@ -22,6 +22,18 @@ export type CalculationIssue = {
   message: string;
 };
 
+const BLOCKING_ISSUE_CODES = new Set([
+  "OFFER_NOT_FOUND",
+  "NO_SCOPES",
+  "SCOPE_HAS_NO_LINES",
+  "LINE_HAS_NO_PARTS",
+  "INVALID_SCOPE_PART",
+  "MISSING_MTO_ROWS",
+  "INVALID_QTY",
+  "INVALID_QUANTITIES",
+  "UNRESOLVED_PRICES",
+]);
+
 export type CalculationMtoDetail = {
   mtoRowId: string;
   materialId: string;
@@ -191,15 +203,46 @@ export async function validateCalculationInputs(offerId: string) {
   return issues;
 }
 
+function splitBlockingIssues(issues: CalculationIssue[]) {
+  return issues.reduce(
+    (acc, issue) => {
+      if (BLOCKING_ISSUE_CODES.has(issue.code)) {
+        acc.blocking.push(issue);
+      } else {
+        acc.nonBlocking.push(issue);
+      }
+
+      return acc;
+    },
+    { blocking: [] as CalculationIssue[], nonBlocking: [] as CalculationIssue[] }
+  );
+}
+
 async function buildCalculationRun(offerId: string): Promise<CalculationRun> {
   const issues = await validateCalculationInputs(offerId);
+  const { blocking: blockingIssues } = splitBlockingIssues(issues);
   const offer = await getOfferById(offerId);
   const currency = normalizeCurrency(offer?.currency ?? defaultCurrency);
+  const activeVersion = await getActiveMtoVersion();
+
+  if (blockingIssues.length > 0) {
+    return {
+      id: `run-${offerId}-${Date.now()}`,
+      offerId,
+      mtoVersionId: activeVersion?.id ?? "no-approved-mto-version",
+      runAt: new Date().toISOString(),
+      status: "failed",
+      total: 0,
+      currency,
+      issues,
+      scopes: [],
+    };
+  }
+
   const offerScopes = await getOfferScopes(offerId);
   const materialPricesById = new Map(
     (await getMaterialPricesForOffer(offerId)).map((price) => [price.materialId, price])
   );
-  const activeVersion = await getActiveMtoVersion();
   const scopeResults: CalculationScopeResult[] = [];
 
   const scopeIds = Array.from(new Set(offerScopes.map((os) => os.scopeId)));
@@ -235,18 +278,21 @@ async function buildCalculationRun(offerId: string): Promise<CalculationRun> {
         const mtoRows = mtoRowsByPartId.get(linePart.partId) ?? [];
         const details = await Promise.all(mtoRows.map(async (row) => {
           const materialPrice = materialPricesById.get(row.materialId);
+          if (!materialPrice || materialPrice.projectPrice === null) {
+            throw new Error(`Missing required material price for mtoRowId=${row.id}`);
+          }
           const unitPrice = await convertMoney(
-            materialPrice?.projectPrice ?? 0,
-            materialPrice?.projectCurrency ?? currency,
+            materialPrice.projectPrice,
+            materialPrice.projectCurrency,
             currency
           );
 
           return {
             mtoRowId: row.id,
             materialId: row.materialId,
-            materialName: materialPrice?.material ?? "Unknown material",
-            dimension: materialPrice?.dimension ?? "",
-            unit: materialPrice?.unit ?? "",
+            materialName: materialPrice.material ?? "Unknown material",
+            dimension: materialPrice.dimension ?? "",
+            unit: materialPrice.unit ?? "",
             value: row.value,
             unitPrice,
             total: row.value * unitPrice,
@@ -303,6 +349,7 @@ async function buildCalculationRun(offerId: string): Promise<CalculationRun> {
 
 export async function calculateOffer(offerId: string): Promise<CalculationRun> {
   const run = await buildCalculationRun(offerId);
+  const persistedTotal = run.status === "failed" ? 0 : run.total;
 
   await prisma.calculationRun.create({
     data: {
@@ -311,9 +358,13 @@ export async function calculateOffer(offerId: string): Promise<CalculationRun> {
       mtoVersionId: run.mtoVersionId,
       runAt: run.runAt,
       status: run.status,
-      total: run.total,
+      total: persistedTotal,
       currency: run.currency,
-      payload: JSON.stringify(run),
+      payload: JSON.stringify({
+        ...run,
+        total: persistedTotal,
+        scopes: run.status === "failed" ? [] : run.scopes,
+      } satisfies CalculationRun),
     },
   });
 
