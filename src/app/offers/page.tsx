@@ -14,17 +14,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { formatMoney } from "@/lib/currency";
 import { getOfferSummary, getOffers } from "@/lib/offers";
 import { getDictionary, getLocale } from "@/i18n/server";
 
 export default async function OffersPage() {
   const locale = await getLocale();
   const dictionary = await getDictionary();
-  const currencyFormatter = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  });
   const offers = await getOffers();
   const summary = await getOfferSummary();
   const currentOffers = offers.filter((offer) => offer.calculationStatus === "current").length;
@@ -41,7 +37,7 @@ export default async function OffersPage() {
         />
         <MetricCard
           title={dictionary.offers.openValue}
-          value={currencyFormatter.format(summary.openValue)}
+          value={formatMoney(summary.openValue, summary.openValueCurrency, locale, 0)}
           description={dictionary.offers.openValueDescription}
           icon={<TrendingUp className="size-4" />}
         />

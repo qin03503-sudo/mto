@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatMoney } from "@/lib/currency";
 import type { Offer, OfferStatus } from "@/lib/offers";
 
 const statusFilters: Array<{ key: "all" | OfferStatus; value: "all" | OfferStatus }> = [
@@ -31,11 +32,6 @@ const statusFilters: Array<{ key: "all" | OfferStatus; value: "all" | OfferStatu
 
 export function OffersTable({ offers }: { offers: Offer[] }) {
   const { dictionary, locale } = useI18n();
-  const currencyFormatter = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  });
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"all" | OfferStatus>("all");
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
@@ -119,7 +115,7 @@ export function OffersTable({ offers }: { offers: Offer[] }) {
                     {offer.closeDate}
                   </TableCell>
                   <TableCell className="text-right font-medium">
-                    {currencyFormatter.format(offer.total)}
+                    {formatMoney(offer.total, offer.currency, locale, 0)}
                   </TableCell>
                 </TableRow>
               ))

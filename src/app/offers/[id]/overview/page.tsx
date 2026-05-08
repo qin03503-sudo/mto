@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { formatMoney } from "@/lib/currency";
 import { getOfferById } from "@/lib/offers";
 import { getMaterialPriceSummary } from "@/lib/material-prices";
 import { getScopeLineSummary } from "@/lib/scopes-lines";
@@ -27,11 +28,6 @@ export default async function OfferOverviewPage({
   const { id } = await params;
   const locale = await getLocale();
   const dictionary = await getDictionary();
-  const currencyFormatter = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  });
   const offer = await getOfferById(id);
 
   if (!offer) {
@@ -55,7 +51,7 @@ export default async function OfferOverviewPage({
             <Info label={dictionary.common.owner} value={offer.owner} />
             <Info label={dictionary.common.inputDate} value={offer.inputDate} />
             <Info label={dictionary.common.closeDate} value={offer.closeDate} />
-            <Info label={dictionary.common.total} value={currencyFormatter.format(offer.total)} />
+            <Info label={dictionary.common.total} value={formatMoney(offer.total, offer.currency, locale, 0)} />
             <Info label={dictionary.overview.configuredScopeLine} value={`${scopeSummary.scopes} ${dictionary.offers.scopesCount} / ${scopeSummary.lines} ${dictionary.offers.linesCount}`} />
             <div className="space-y-1">
               <div className="text-sm text-muted-foreground">{dictionary.overview.offerStatus}</div>

@@ -22,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatMoney } from "@/lib/currency";
 import { getCalculationResults } from "@/lib/calculation";
 import { getOfferById } from "@/lib/offers";
 import { getDictionary, getLocale } from "@/i18n/server";
@@ -34,11 +35,6 @@ export default async function CalculationPage({
   const { id } = await params;
   const locale = await getLocale();
   const dictionary = await getDictionary();
-  const currencyFormatter = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  });
   const numberFormatter = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US", {
     maximumFractionDigits: 4,
   });
@@ -50,6 +46,7 @@ export default async function CalculationPage({
 
   const calculation = await getCalculationResults(id);
   const canCalculate = calculation.issues.length === 0;
+  const calcCurrency = "currency" in calculation ? calculation.currency : offer.currency;
 
   return (
     <AppShell>
@@ -100,7 +97,7 @@ export default async function CalculationPage({
                   </CardDescription>
                 </div>
                 <div className="text-xl font-semibold">
-                  {currencyFormatter.format(scope.total)}
+                  {formatMoney(scope.total, calcCurrency, locale, 0)}
                 </div>
               </CardHeader>
               <CardContent className="space-y-5">
@@ -114,7 +111,7 @@ export default async function CalculationPage({
                         </div>
                       </div>
                       <div className="font-medium">
-                        {currencyFormatter.format(line.total)}
+                        {formatMoney(line.total, calcCurrency, locale, 0)}
                       </div>
                     </div>
                     <Table>
@@ -137,10 +134,10 @@ export default async function CalculationPage({
                               </TableCell>
                               <TableCell className="text-right">{part.qty}</TableCell>
                               <TableCell className="hidden md:table-cell text-right">
-                                {currencyFormatter.format(part.unitPrice)}
+                                {formatMoney(part.unitPrice)}
                               </TableCell>
                               <TableCell className="text-right font-medium">
-                                {currencyFormatter.format(part.total)}
+                                {formatMoney(part.total)}
                               </TableCell>
                             </TableRow>
                             {part.details.length > 0 ? (
@@ -168,10 +165,10 @@ export default async function CalculationPage({
                                              {dictionary.common.value} {numberFormatter.format(detail.value)}
                                           </div>
                                           <div className="md:text-right">
-                                            {currencyFormatter.format(detail.unitPrice)}
+                                            {formatMoney(detail.unitPrice)}
                                           </div>
                                           <div className="font-medium md:text-right">
-                                            {currencyFormatter.format(detail.total)}
+                                            {formatMoney(detail.total)}
                                           </div>
                                         </div>
                                       ))}
@@ -199,7 +196,7 @@ export default async function CalculationPage({
             <SummaryRow label={dictionary.calculation.runId} value={calculation.id} />
             <SummaryRow label={dictionary.calculation.mtoVersion} value={calculation.mtoVersionId} />
             <SummaryRow label={dictionary.calculation.runTime} value={calculation.runAt} />
-            <SummaryRow label={dictionary.calculation.offerTotal} value={currencyFormatter.format(calculation.total)} />
+            <SummaryRow label={dictionary.calculation.offerTotal} value={formatMoney(calculation.total)} />
             <div className="flex items-center justify-between rounded-xl border bg-muted/40 p-4">
               <span className="text-sm text-muted-foreground">{dictionary.calculation.runStatus}</span>
               <Badge
