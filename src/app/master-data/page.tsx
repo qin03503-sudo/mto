@@ -1,30 +1,12 @@
 import { Database, Factory, Layers3, PackageSearch } from "lucide-react";
-
 import { AppShell } from "@/components/app-shell";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getMaterials, getMtoVersions, getUnits } from "@/lib/master-data";
 import { getMtoRows, getPartsForScope, getScopes } from "@/lib/scopes-lines";
-
-const numberFormatter = new Intl.NumberFormat("en-US", {
-  maximumFractionDigits: 4,
-});
+import { MasterDataClientWrapper } from "./client-wrapper";
 
 export default async function MasterDataPage() {
-  const [materials, mtoVersions, units, scopes, parts, mtoRows] = await Promise.all([
+  const [materials, , units, scopes, parts, mtoRows] = await Promise.all([
     getMaterials(),
     getMtoVersions(),
     getUnits(),
@@ -32,7 +14,6 @@ export default async function MasterDataPage() {
     getPartsForScope(),
     getMtoRows(),
   ]);
-  const activeVersion = mtoVersions.find((version) => version.status === "approved");
 
   return (
     <AppShell>
@@ -43,130 +24,28 @@ export default async function MasterDataPage() {
         <MetricCard title="MTO rows" value={mtoRows.length} icon={<Database />} />
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+      <section>
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Material Master</CardTitle>
+            <CardTitle>Manage Master Data</CardTitle>
+            <CardDescription>Full CRUD operations for materials, scopes, parts, and MTO rows.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="overflow-hidden rounded-2xl border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Material</TableHead>
-                    <TableHead>Unit</TableHead>
-                    <TableHead className="text-right">Default</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {materials.map((material) => {
-                    const unit = units.find((candidate) => candidate.id === material.unitId);
-
-                    return (
-                      <TableRow key={material.id}>
-                        <TableCell>
-                          <div className="font-medium">{material.name}</div>
-                          <div className="text-xs text-muted-foreground">{material.dimension}</div>
-                        </TableCell>
-                        <TableCell>{unit?.symbol ?? "-"}</TableCell>
-                        <TableCell className="text-right">
-                          {material.defaultPrice === null
-                            ? "Unresolved"
-                            : numberFormatter.format(material.defaultPrice)}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle>Scope And Part Catalog</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-3 md:grid-cols-2">
-            {scopes.map((scope) => {
-              const scopeParts = parts.filter((part) => part.scopeId === scope.id);
-
-              return (
-                <div key={scope.id} className="rounded-2xl border bg-muted/30 p-4">
-                  <div className="font-medium">{scope.name}</div>
-                  <div className="mt-1 text-xs text-muted-foreground">{scope.description}</div>
-                  <div className="mt-4 space-y-2">
-                    {scopeParts.map((part) => (
-                      <div key={part.id} className="rounded-xl bg-background px-3 py-2 text-sm shadow-sm ring-1 ring-border">
-                        {part.name}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+            <MasterDataClientWrapper
+              materials={materials}
+              scopes={scopes}
+              parts={parts}
+              mtoRows={mtoRows}
+              units={units}
+            />
           </CardContent>
         </Card>
       </section>
-
-      <Card className="shadow-sm">
-        <CardHeader>
-          <CardTitle>MTO Master Rows</CardTitle>
-          <CardDescription>
-            Active version {activeVersion?.version ?? "not selected"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-hidden rounded-2xl border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Scope</TableHead>
-                  <TableHead>Part</TableHead>
-                  <TableHead>Material</TableHead>
-                  <TableHead className="text-right">Qty</TableHead>
-                  <TableHead className="text-right">Value</TableHead>
-                  <TableHead>Unit</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mtoRows.map((row) => {
-                  const scope = scopes.find((candidate) => candidate.id === row.scopeId);
-                  const part = parts.find((candidate) => candidate.id === row.partId);
-                  const material = materials.find((candidate) => candidate.id === row.materialId);
-
-                  return (
-                    <TableRow key={row.id}>
-                      <TableCell>{scope?.name ?? "Unknown"}</TableCell>
-                      <TableCell>{part?.name ?? "Unknown"}</TableCell>
-                      <TableCell>
-                        <div className="font-medium">{material?.name ?? "Unknown"}</div>
-                        <div className="text-xs text-muted-foreground">{row.description}</div>
-                      </TableCell>
-                      <TableCell className="text-right">{numberFormatter.format(row.quantity)}</TableCell>
-                      <TableCell className="text-right">{numberFormatter.format(row.value)}</TableCell>
-                      <TableCell>{row.unit || "-"}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
     </AppShell>
   );
 }
 
-function MetricCard({
-  title,
-  value,
-  icon,
-}: {
-  title: string;
-  value: number;
-  icon: React.ReactNode;
-}) {
+function MetricCard({ title, value, icon }: { title: string; value: number; icon: React.ReactNode; }) {
   return (
     <Card className="shadow-sm">
       <CardHeader>
