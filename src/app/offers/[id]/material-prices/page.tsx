@@ -1,11 +1,10 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AppShell } from "@/components/app-shell";
 import { OfferFlowProgress } from "@/components/offer-flow-progress";
 import { MaterialPricesTable } from "@/components/material-prices-table";
 import { CalculationStatusBadge } from "@/components/offer-status-badge";
-import { Button } from "@/components/ui/button";
+import { PageActionBar } from "@/components/page-action-bar";
 import {
   Card,
   CardContent,
@@ -44,11 +43,11 @@ export default async function MaterialPricesPage({
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              <Button nativeButton={false} variant="outline" size="sm" render={<Link href={`/offers/${id}/overview`} />}>
-                {dictionary.common.backToOverview}
-              </Button>
-            </div>
+            <PageActionBar
+              primary={{ key: "calculate", href: `/offers/${id}/calculation`, label: dictionary.pageActions.calculate.label, ariaLabel: dictionary.pageActions.calculate.aria }}
+              secondary={[{ key: "edit-scopes", href: `/offers/${id}/scopes-lines`, label: dictionary.pageActions.editScopes.label, ariaLabel: dictionary.pageActions.editScopes.aria }]}
+              tertiary={[{ key: "back-overview", href: `/offers/${id}/overview`, label: dictionary.pageActions.backToOverview.label, ariaLabel: dictionary.pageActions.backToOverview.aria }]}
+            />
             <MaterialPricesTable offerId={id} prices={prices} />
           </CardContent>
         </Card>
