@@ -10,6 +10,8 @@ import {
   Inbox,
   AlertOctagon,
   Send,
+  Blocks,
+  FileStack,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -17,6 +19,21 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useI18n, useLocalizedPath } from "@/i18n/client";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarFooter,
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { dictionary, locale } = useI18n();
@@ -26,6 +43,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: "/offers", label: dictionary.shell.offers, icon: LayoutDashboard },
     { href: "/offers/new", label: dictionary.shell.newOffer, icon: FilePlus2 },
+    { href: "/scopes", label: "Scopes", icon: Blocks },
+    { href: "/parts", label: "Parts", icon: FileStack },
     { href: "/dashboard", label: dictionary.shell.dashboard, icon: BarChart3 },
     { href: "/offers/inbox", label: dictionary.shell.managementInbox, icon: Inbox },
     { href: "/offers/stale", label: dictionary.shell.managementStale, icon: AlertOctagon },
@@ -40,80 +59,84 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     navItems.find((item) => normalizedPath === item.href || normalizedPath.startsWith(`${item.href}/`)) ?? navItems[0];
 
   return (
-    <main className="min-h-screen px-3 py-3 text-foreground sm:px-5 lg:px-7">
-      <div className="mx-auto grid w-full max-w-[1440px] gap-4 xl:grid-cols-[248px_1fr]">
-        <aside className="rounded-2xl border border-sidebar-border bg-sidebar p-3 text-sidebar-foreground shadow-sm xl:sticky xl:top-4 xl:h-[calc(100vh-2rem)]">
-          <div className="flex h-full flex-col gap-6">
-            <Link href={localizePath("/offers")} className="group flex items-center gap-3 rounded-xl p-2">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground">
-                <Calculator className="size-5" />
-              </div>
-              <div>
-                <div className="font-semibold tracking-tight">Busduct MTO</div>
-                <div className="text-xs text-sidebar-foreground/60">{dictionary.shell.pricingWorkspace}</div>
-              </div>
-            </Link>
-
-            <nav className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = normalizedPath === item.href || normalizedPath.startsWith(`${item.href}/`);
-
-                return (
-                  <Button
-                    key={item.href}
-                    nativeButton={false}
-                    variant={isActive ? "secondary" : "ghost"}
-                    className="h-10 justify-start rounded-xl text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                    render={<Link href={localizePath(item.href)} />}
-                  >
-                    <Icon className="size-4" />
-                    {item.label}
-                  </Button>
-                );
-              })}
-            </nav>
-
-            <div className="mt-auto rounded-2xl border border-sidebar-border bg-white/5 p-4">
-              <div className="text-xs font-medium uppercase tracking-[0.22em] text-sidebar-foreground/50">
-                {dictionary.shell.workspace}
-              </div>
-              <div className="mt-3 space-y-2 text-sm text-sidebar-foreground/75">
-                <div className="flex justify-between gap-3"><span>{dictionary.shell.storage}</span><span>SQLite</span></div>
-                <div className="flex justify-between gap-3"><span>{dictionary.shell.pricing}</span><span>MTO Value</span></div>
-                <div className="flex justify-between gap-3"><span>{dictionary.shell.output}</span><span>{dictionary.shell.auditView}</span></div>
-              </div>
+    <SidebarProvider>
+      <Sidebar>
+        <SidebarHeader className="p-4 border-b border-sidebar-border">
+          <Link href={localizePath("/offers")} className="flex items-center gap-3 group">
+            <div className="flex items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground size-8">
+              <Calculator className="size-5" />
             </div>
+            <div className="flex flex-col">
+              <span className="font-semibold tracking-tight text-sidebar-foreground">Busduct MTO</span>
+              <span className="text-[10px] text-sidebar-foreground/60 uppercase tracking-wider">{dictionary.shell.pricingWorkspace}</span>
+            </div>
+          </Link>
+        </SidebarHeader>
+
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Menu</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = normalizedPath === item.href || normalizedPath.startsWith(`${item.href}/`);
+
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton isActive={isActive} tooltip={item.label}>
+                        <Link href={localizePath(item.href)} className="flex items-center gap-2 w-full">
+                          <Icon className="w-4 h-4" />
+                          <span>{item.label}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+
+        <SidebarFooter className="p-4 border-t border-sidebar-border text-xs text-sidebar-foreground/60">
+          <div className="font-medium uppercase tracking-widest mb-2 opacity-50">{dictionary.shell.workspace}</div>
+          <div className="space-y-1">
+            <div className="flex justify-between"><span>{dictionary.shell.storage}</span><span>SQLite</span></div>
+            <div className="flex justify-between"><span>{dictionary.shell.pricing}</span><span>MTO Value</span></div>
           </div>
-        </aside>
+        </SidebarFooter>
+      </Sidebar>
 
-        <div className="flex min-w-0 flex-col gap-4">
-          <header className="overflow-hidden rounded-2xl border bg-card p-5 shadow-sm">
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">
-                  {dictionary.shell.offerEngineering}
-                </div>
-                <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
-                  {currentNavItem.label}
-                </h1>
-                <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
-                  {dictionary.shell.heroDescription}
-                </p>
-              </div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <LanguageSwitcher />
-                <Button nativeButton={false} size="lg" className="rounded-xl" render={<Link href={localizePath("/offers/new")} />}>
-                  <FilePlus2 />
-                  {dictionary.shell.newOffer}
-                </Button>
-              </div>
+      <div className="flex flex-col flex-1 w-full min-h-screen overflow-hidden">
+        <header className="flex items-center h-16 gap-4 px-4 bg-background border-b md:px-6 shrink-0">
+          <SidebarTrigger />
+          <Separator orientation="vertical" className="h-6" />
+
+          <div className="flex-1">
+            <div className="text-sm font-medium text-muted-foreground">{currentNavItem.label}</div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <LanguageSwitcher />
+            {/* Adding 'asChild' to Shadcn button to properly wrap Link and maintain standard prop usage */}
+            <Button size="sm" className="hidden sm:flex" nativeButton={false} render={<Link href={localizePath("/offers/new")} />}>
+              <FilePlus2 className="w-4 h-4 mr-2" />
+              {dictionary.shell.newOffer}
+            </Button>
+          </div>
+        </header>
+
+        {/* Main Content Area - adding 20% breathing space with p-6 or p-8 instead of generic padding */}
+        <main className="flex-1 p-6 md:p-8 lg:p-10 overflow-auto bg-muted/20">
+          <div className="max-w-7xl mx-auto w-full space-y-8">
+            <div className="flex flex-col gap-2">
+              <h1 className="text-3xl font-bold tracking-tight">{currentNavItem.label}</h1>
+              <p className="text-muted-foreground max-w-2xl text-lg">{dictionary.shell.heroDescription}</p>
             </div>
-          </header>
-
-          {children}
-        </div>
+            {children}
+          </div>
+        </main>
       </div>
-    </main>
+    </SidebarProvider>
   );
 }

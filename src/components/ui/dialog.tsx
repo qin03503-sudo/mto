@@ -6,7 +6,6 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
-import { useI18n } from "@/i18n/client"
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
@@ -48,8 +47,6 @@ function DialogContent({
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean
 }) {
-  const { dictionary } = useI18n();
-
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -75,7 +72,7 @@ function DialogContent({
           >
             <XIcon
             />
-            <span className="sr-only">{dictionary.common.close}</span>
+            <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Popup>
@@ -101,8 +98,6 @@ function DialogFooter({
 }: React.ComponentProps<"div"> & {
   showCloseButton?: boolean
 }) {
-  const { dictionary } = useI18n();
-
   return (
     <div
       data-slot="dialog-footer"
@@ -115,7 +110,7 @@ function DialogFooter({
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close render={<Button variant="outline" />}>
-          {dictionary.common.close}
+          Close
         </DialogPrimitive.Close>
       )}
     </div>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import Link from "next/link";
@@ -70,7 +71,7 @@ export default function MtoRowsPage() {
   return (
     <AppShell>
       <section className="space-y-6">
-        <Card className="shadow-sm">
+        <Card className="shadow-sm border-border/50 transition-all hover:shadow-md">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>{dictionary.masterData.mtoMasterRows}</CardTitle>
@@ -97,7 +98,7 @@ export default function MtoRowsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="overflow-hidden rounded-2xl border">
+            <div className="overflow-hidden rounded-2xl border border-border/50 bg-background/50 backdrop-blur-sm">
               {mtoRowsData.length === 0 ? (
                 <div className="py-10 text-center text-muted-foreground">
                   {dictionary.masterData.noMtoRows}
@@ -122,7 +123,7 @@ export default function MtoRowsPage() {
                       const part = partsById.get(row.partId);
                       const material = materialsById.get(row.materialId);
                       return (
-                        <TableRow key={row.id} className="hover:bg-muted">
+                        <TableRow key={row.id} className="hover:bg-muted/50 py-2">
                           <TableCell>
                             {scope?.name ?? dictionary.masterData.unknownScope}
                           </TableCell>

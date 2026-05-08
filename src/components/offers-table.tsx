@@ -71,7 +71,7 @@ export function OffersTable({ offers }: { offers: Offer[] }) {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border">
+      <div className="overflow-hidden rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm">
         <Table>
           <TableHeader>
             <TableRow>
