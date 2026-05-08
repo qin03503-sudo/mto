@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import Link from "next/link";
@@ -53,7 +54,7 @@ export default function PartsPage() {
   return (
     <AppShell>
       <section className="space-y-6">
-        <Card className="shadow-sm">
+        <Card className="shadow-sm border-border/50 transition-all hover:shadow-md">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>{dictionary.masterData.partsMaster}</CardTitle>
@@ -80,7 +81,7 @@ export default function PartsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="overflow-hidden rounded-2xl border">
+            <div className="overflow-hidden rounded-2xl border border-border/50 bg-background/50 backdrop-blur-sm">
               {partsData.length === 0 ? (
                 <div className="py-10 text-center text-muted-foreground">
                   {dictionary.masterData.noParts}
@@ -96,7 +97,7 @@ export default function PartsPage() {
                   </TableHeader>
                   <TableBody>
                     {partsData.map((part: any) => (
-                      <TableRow key={part.id} className="hover:bg-muted">
+                      <TableRow key={part.id} className="hover:bg-muted/50 py-2">
                         <TableCell>
                           <div className="font-medium">{part.name}</div>
                         </TableCell>

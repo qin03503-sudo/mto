@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import Link from "next/link";
@@ -58,7 +59,7 @@ export default function MaterialsPage() {
   return (
     <AppShell>
       <section className="space-y-6">
-        <Card className="shadow-sm">
+        <Card className="shadow-sm border-border/50 transition-all hover:shadow-md">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>{dictionary.masterData.materialsMaster}</CardTitle>
@@ -85,7 +86,7 @@ export default function MaterialsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="overflow-hidden rounded-2xl border">
+            <div className="overflow-hidden rounded-2xl border border-border/50 bg-background/50 backdrop-blur-sm">
               {materialsData.length === 0 ? (
                 <div className="py-10 text-center text-muted-foreground">
                   {dictionary.masterData.noMaterials}
@@ -104,7 +105,7 @@ export default function MaterialsPage() {
                     {materialsData.map((material: any) => {
                       const unit = unitsById.get(material.unitId);
                       return (
-                        <TableRow key={material.id} className="hover:bg-muted">
+                        <TableRow key={material.id} className="hover:bg-muted/50 py-2">
                           <TableCell>
                             <div className="font-medium">{material.name}</div>
                             <div className="text-xs text-muted-foreground">{material.dimension}</div>

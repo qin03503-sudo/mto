@@ -87,7 +87,7 @@ function MetricCard({
   icon: React.ReactNode;
 }) {
   return (
-    <Card className="bg-card shadow-sm">
+    <Card className="bg-card shadow-sm border-border/50 transition-all hover:shadow-md">
       <CardHeader>
         <CardDescription className="flex items-center gap-2">
           {icon}
