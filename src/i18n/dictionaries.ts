@@ -193,6 +193,8 @@ export const dictionaries = {
       partsAvailableFor: "Parts available for {scope}",
       invalidQuantities: "Invalid quantities",
       lineParts: "Line parts",
+      searchLinesParts: "Search lines or parts...",
+      scopeLines: "Scope lines",
     },
     calculation: {
       title: "Calculation",
@@ -213,6 +215,9 @@ export const dictionaries = {
       runTime: "Run time",
       offerTotal: "Offer total",
       runStatus: "Run status",
+      filterPlaceholder: "Filter by text...",
+      onlyIssues: "Only issues",
+      unresolved: "Unresolved",
     },
     review: {
       title: "Review & Export",
@@ -506,6 +511,8 @@ export const dictionaries = {
       partsAvailableFor: "قطعات موجود برای {scope}",
       invalidQuantities: "تعدادهای نامعتبر",
       lineParts: "قطعات خط",
+      searchLinesParts: "جستجو در خطوط یا پارت‌ها...",
+      scopeLines: "خطوط Scope",
     },
     calculation: {
       title: "محاسبه",
@@ -526,6 +533,9 @@ export const dictionaries = {
       runTime: "زمان اجرا",
       offerTotal: "مجموع پیشنهاد",
       runStatus: "وضعیت اجرا",
+      filterPlaceholder: "فیلتر متنی...",
+      onlyIssues: "فقط موارد مشکل‌دار",
+      unresolved: "حل‌نشده",
     },
     review: {
       title: "بازبینی و خروجی",
