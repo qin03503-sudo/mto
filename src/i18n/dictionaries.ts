@@ -179,6 +179,21 @@ export const dictionaries = {
       offerTotal: "Offer total",
       runStatus: "Run status",
     },
+    offerFlow: {
+      title: "Offer flow",
+      complete: "Complete",
+      current: "Current",
+      locked: "Locked",
+      nextStep: "Next step",
+      back: "Back",
+      steps: {
+        overview: "Overview",
+        "material-prices": "Material Prices",
+        "scopes-lines": "Scopes & Lines",
+        calculation: "Calculation",
+        "review-export": "Review/Export",
+      },
+    },
     dashboard: {
       offersByStatus: "Offers by status",
       topOfferValues: "Top offer values",
@@ -418,6 +433,21 @@ export const dictionaries = {
       runTime: "زمان اجرا",
       offerTotal: "مجموع پیشنهاد",
       runStatus: "وضعیت اجرا",
+    },
+    offerFlow: {
+      title: "جریان پیشنهاد",
+      complete: "تکمیل",
+      current: "فعلی",
+      locked: "قفل",
+      nextStep: "گام بعدی",
+      back: "بازگشت",
+      steps: {
+        overview: "نمای کلی",
+        "material-prices": "قیمت متریال ها",
+        "scopes-lines": "Scope ها و خطوط",
+        calculation: "محاسبه",
+        "review-export": "بازبینی/خروجی",
+      },
     },
     dashboard: {
       offersByStatus: "Offers by status",

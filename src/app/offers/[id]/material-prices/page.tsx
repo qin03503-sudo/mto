@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AppShell } from "@/components/app-shell";
+import { OfferFlowProgress } from "@/components/offer-flow-progress";
 import { MaterialPricesTable } from "@/components/material-prices-table";
 import { CalculationStatusBadge } from "@/components/offer-status-badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getMaterialPricesForOffer, getMaterialPriceSummary } from "@/lib/material-prices";
+import { getOfferFlowState } from "@/lib/offer-flow";
 import { getOfferById } from "@/lib/offers";
 import { getDictionary } from "@/i18n/server";
 
@@ -30,6 +32,7 @@ export default async function MaterialPricesPage({
 
   const prices = await getMaterialPricesForOffer(id);
   const summary = await getMaterialPriceSummary(id);
+  const flow = await getOfferFlowState(id);
 
   return (
     <AppShell>
@@ -50,20 +53,23 @@ export default async function MaterialPricesPage({
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{dictionary.common.summary}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <SummaryRow label={dictionary.common.materials} value={summary.total.toString()} />
-            <SummaryRow label={dictionary.materialPrices.overrides} value={summary.overridden.toString()} />
-            <SummaryRow label={dictionary.common.unresolved} value={summary.unresolved.toString()} />
-            <div className="space-y-2 rounded-xl border bg-muted/50 p-4">
-              <div className="text-sm text-muted-foreground">{dictionary.overview.calculationStatus}</div>
-              <CalculationStatusBadge status={offer.calculationStatus} />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>{dictionary.common.summary}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <SummaryRow label={dictionary.common.materials} value={summary.total.toString()} />
+              <SummaryRow label={dictionary.materialPrices.overrides} value={summary.overridden.toString()} />
+              <SummaryRow label={dictionary.common.unresolved} value={summary.unresolved.toString()} />
+              <div className="space-y-2 rounded-xl border bg-muted/50 p-4">
+                <div className="text-sm text-muted-foreground">{dictionary.overview.calculationStatus}</div>
+                <CalculationStatusBadge status={offer.calculationStatus} />
+              </div>
+            </CardContent>
+          </Card>
+          <OfferFlowProgress offerId={id} currentStep="material-prices" completed={flow.completed} dictionary={dictionary.offerFlow} />
+        </div>
       </section>
     </AppShell>
   );
