@@ -35,32 +35,35 @@ export default async function OfferReviewPage({ params }: { params: Promise<{ id
 
   return (
     <AppShell>
-      <section className="grid gap-6 lg:grid-cols-[1fr_340px]">
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardDescription>{offer.offerNumber}</CardDescription>
-              <CardTitle>{dictionary.review.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-3 sm:grid-cols-2">
-              <Info label={dictionary.review.offerStatus} value={<OfferStatusBadge status={offer.status} />} />
-              <Info label={dictionary.review.calculationStatus} value={<CalculationStatusBadge status={offer.calculationStatus} />} />
-              <Info label={dictionary.review.materialOverrides} value={`${materialSummary.overridden}`} />
-              <Info label={dictionary.review.unresolvedMaterials} value={`${materialSummary.unresolved}`} />
-              <Info label={dictionary.review.completeness} value={`${scopeSummary.scopes} / ${scopeSummary.lines} / ${scopeSummary.parts}`} />
-              <Info label={dictionary.review.lastRun} value={calculation.runAt} />
-              <Info label={dictionary.review.lastRunStatus} value={dictionary.statuses[calculation.status]} />
-              <Info label={dictionary.review.offerTotal} value={formatMoney(calculation.total, calculation.currency, locale, 0)} />
-            </CardContent>
-          </Card>
+      <div className="space-y-6">
+        <OfferFlowProgress offerId={id} currentStep="review-export" completed={flow.completed} dictionary={dictionary.offerFlow} />
 
-          {materialSummary.unresolved > 0 ? <Alert tone="danger" title={dictionary.review.unresolvedBlockTitle} description={dictionary.review.unresolvedBlockDescription.replace("{count}", String(materialSummary.unresolved))} /> : null}
-          {calculation.status !== "current" ? <Alert tone="warn" title={dictionary.review.outdatedBlockTitle} description={dictionary.review.outdatedBlockDescription} /> : null}
-          {hasMissingScopesLinesParts ? <Alert tone="danger" title={dictionary.review.missingBlockTitle} description={dictionary.review.missingBlockDescription.replace("{scopes}", String(scopeSummary.scopes)).replace("{lines}", String(scopeSummary.lines)).replace("{parts}", String(scopeSummary.parts)).replace("{invalid}", String(scopeSummary.invalidQuantities))} /> : null}
-        </div>
+        <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardDescription>{offer.offerNumber}</CardDescription>
+                <CardTitle>{dictionary.review.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-3 sm:grid-cols-2">
+                <Info label={dictionary.review.offerStatus} value={<OfferStatusBadge status={offer.status} />} />
+                <Info label={dictionary.review.calculationStatus} value={<CalculationStatusBadge status={offer.calculationStatus} />} />
+                <Info label={dictionary.review.materialOverrides} value={`${materialSummary.overridden}`} />
+                <Info label={dictionary.review.unresolvedMaterials} value={`${materialSummary.unresolved}`} />
+                <Info label={dictionary.review.completeness} value={`${scopeSummary.scopes} / ${scopeSummary.lines} / ${scopeSummary.parts}`} />
+                <Info label={dictionary.review.lastRun} value={calculation.runAt} />
+                <Info label={dictionary.review.lastRunStatus} value={dictionary.statuses[calculation.status]} />
+                <Info label={dictionary.review.offerTotal} value={formatMoney(calculation.total, calculation.currency, locale, 0)} />
+              </CardContent>
+            </Card>
 
-        <div className="space-y-6">
-          <Card>
+            {materialSummary.unresolved > 0 ? <Alert tone="danger" title={dictionary.review.unresolvedBlockTitle} description={dictionary.review.unresolvedBlockDescription.replace("{count}", String(materialSummary.unresolved))} /> : null}
+            {calculation.status !== "current" ? <Alert tone="warn" title={dictionary.review.outdatedBlockTitle} description={dictionary.review.outdatedBlockDescription} /> : null}
+            {hasMissingScopesLinesParts ? <Alert tone="danger" title={dictionary.review.missingBlockTitle} description={dictionary.review.missingBlockDescription.replace("{scopes}", String(scopeSummary.scopes)).replace("{lines}", String(scopeSummary.lines)).replace("{parts}", String(scopeSummary.parts)).replace("{invalid}", String(scopeSummary.invalidQuantities))} /> : null}
+          </div>
+
+          <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+            <Card>
             <CardHeader>
               <CardTitle>{dictionary.review.actionsTitle}</CardTitle>
             </CardHeader>
@@ -85,9 +88,9 @@ export default async function OfferReviewPage({ params }: { params: Promise<{ id
               </Button>
             </CardContent>
           </Card>
-          <OfferFlowProgress offerId={id} currentStep="review-export" completed={flow.completed} dictionary={dictionary.offerFlow} />
-        </div>
-      </section>
+          </div>
+        </section>
+      </div>
     </AppShell>
   );
 }
