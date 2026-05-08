@@ -41,8 +41,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <main className="min-h-screen px-3 py-3 text-foreground sm:px-5 lg:px-7">
-      <div className="mx-auto grid w-full max-w-[1440px] gap-4 lg:grid-cols-[248px_1fr]">
-        <aside className="rounded-2xl border border-sidebar-border bg-sidebar p-3 text-sidebar-foreground shadow-sm lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)]">
+      <div className="mx-auto grid w-full max-w-[1440px] gap-4 xl:grid-cols-[248px_1fr]">
+        <aside className="rounded-2xl border border-sidebar-border bg-sidebar p-3 text-sidebar-foreground shadow-sm xl:sticky xl:top-4 xl:h-[calc(100vh-2rem)]">
           <div className="flex h-full flex-col gap-6">
             <Link href={localizePath("/offers")} className="group flex items-center gap-3 rounded-xl p-2">
               <div className="flex size-10 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground">
@@ -54,7 +54,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </div>
             </Link>
 
-            <nav className="grid gap-2">
+            <nav className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = normalizedPath === item.href || normalizedPath.startsWith(`${item.href}/`);
