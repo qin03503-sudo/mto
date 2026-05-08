@@ -8,6 +8,7 @@ import {
 } from "@/app/offers/[id]/scopes-lines/actions";
 import { AppShell } from "@/components/app-shell";
 import { OfferFlowProgress } from "@/components/offer-flow-progress";
+import { PageActionBar } from "@/components/page-action-bar";
 import { CalculationStatusBadge } from "@/components/offer-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -122,34 +123,38 @@ export default async function ScopesLinesPage({
                   </Badge>
                 ))}
               </div>
-              <div className="flex flex-wrap gap-2">
-                <form
-                  action={addScopeAction.bind(null, id)}
-                  className="flex flex-col gap-2 sm:flex-row sm:items-end"
-                >
-                  <div className="grid gap-2">
-                    <Label htmlFor="scope_id">{dictionary.scopesLines.addScope}</Label>
-                    <Select name="scope_id" disabled={availableScopes.length === 0}>
-                      <SelectTrigger id="scope_id" className="w-full sm:w-[220px]">
-                        <SelectValue placeholder={dictionary.scopesLines.selectScope} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableScopes.map((scope) => (
-                          <SelectItem key={scope.id} value={scope.id}>
-                            {scope.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button size="sm" disabled={availableScopes.length === 0}>
-                    {dictionary.scopesLines.addScopeButton}
+              <PageActionBar
+                primary={
+                  <form
+                    action={addScopeAction.bind(null, id)}
+                    className="flex flex-col gap-2 sm:flex-row sm:items-end"
+                  >
+                    <div className="grid gap-2">
+                      <Label htmlFor="scope_id">{dictionary.scopesLines.addScope}</Label>
+                      <Select name="scope_id" disabled={availableScopes.length === 0}>
+                        <SelectTrigger id="scope_id" className="w-full sm:w-[220px]">
+                          <SelectValue placeholder={dictionary.scopesLines.selectScope} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableScopes.map((scope) => (
+                            <SelectItem key={scope.id} value={scope.id}>
+                              {scope.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button size="sm" aria-label={dictionary.scopesLines.primaryActionAria} disabled={availableScopes.length === 0}>
+                      {dictionary.scopesLines.addScopeButton}
+                    </Button>
+                  </form>
+                }
+                tertiary={
+                  <Button nativeButton={false} size="sm" variant="outline" aria-label={dictionary.common.backToOverviewAria} render={<Link href={`/offers/${id}/overview`} />}>
+                    {dictionary.common.backToOverview}
                   </Button>
-                </form>
-                <Button nativeButton={false} size="sm" variant="outline" render={<Link href={`/offers/${id}/overview`} />}>
-                  {dictionary.common.backToOverview}
-                </Button>
-              </div>
+                }
+              />
             </CardContent>
           </Card>
 

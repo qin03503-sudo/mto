@@ -4,10 +4,12 @@ import { Calculator, Layers3, PackageCheck, ShieldCheck } from "lucide-react";
 
 import { AppShell } from "@/components/app-shell";
 import { OfferFlowProgress } from "@/components/offer-flow-progress";
+import { PageActionBar } from "@/components/page-action-bar";
 import {
   CalculationStatusBadge,
   OfferStatusBadge,
 } from "@/components/offer-status-badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -103,6 +105,35 @@ export default async function OfferOverviewPage({
                 icon={<ShieldCheck className="size-4" />}
                 label={dictionary.review.title}
                 detail={dictionary.review.stepDetail}
+              />
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle>{dictionary.overview.pageActionsTitle}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PageActionBar
+                primary={
+                  <Button nativeButton={false} aria-label={dictionary.overview.primaryActionAria} render={<Link href={`/offers/${offer.id}/calculation`} />}>
+                    {dictionary.common.calculate}
+                  </Button>
+                }
+                secondary={
+                  <>
+                    <Button nativeButton={false} size="sm" variant="outline" aria-label={dictionary.overview.secondaryMaterialPricesAria} render={<Link href={`/offers/${offer.id}/material-prices`} />}>
+                      {dictionary.overview.materialPrices}
+                    </Button>
+                    <Button nativeButton={false} size="sm" variant="outline" aria-label={dictionary.overview.secondaryScopesLinesAria} render={<Link href={`/offers/${offer.id}/scopes-lines`} />}>
+                      {dictionary.overview.scopesAndLines}
+                    </Button>
+                  </>
+                }
+                tertiary={
+                  <Button nativeButton={false} size="sm" variant="ghost" aria-label={dictionary.overview.tertiaryReviewAria} render={<Link href={`/offers/${offer.id}/review`} />}>
+                    {dictionary.review.title}
+                  </Button>
+                }
               />
             </CardContent>
           </Card>

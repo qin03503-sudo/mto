@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { AppShell } from "@/components/app-shell";
 import { OfferFlowProgress } from "@/components/offer-flow-progress";
+import { PageActionBar } from "@/components/page-action-bar";
 import { MaterialPricesTable } from "@/components/material-prices-table";
 import { CalculationStatusBadge } from "@/components/offer-status-badge";
 import { Button } from "@/components/ui/button";
@@ -44,11 +45,18 @@ export default async function MaterialPricesPage({
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              <Button nativeButton={false} variant="outline" size="sm" render={<Link href={`/offers/${id}/overview`} />}>
-                {dictionary.common.backToOverview}
-              </Button>
-            </div>
+            <PageActionBar
+              primary={
+                <Button aria-label={dictionary.materialPrices.primaryActionAria}>
+                  {dictionary.materialPrices.primaryAction}
+                </Button>
+              }
+              tertiary={
+                <Button nativeButton={false} variant="outline" size="sm" aria-label={dictionary.common.backToOverviewAria} render={<Link href={`/offers/${id}/overview`} />}>
+                  {dictionary.common.backToOverview}
+                </Button>
+              }
+            />
             <MaterialPricesTable offerId={id} prices={prices} />
           </CardContent>
         </Card>

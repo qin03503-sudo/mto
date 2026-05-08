@@ -5,6 +5,7 @@ import { Fragment } from "react";
 import { calculateOfferAction } from "@/app/offers/[id]/calculation/actions";
 import { AppShell } from "@/components/app-shell";
 import { OfferFlowProgress } from "@/components/offer-flow-progress";
+import { PageActionBar } from "@/components/page-action-bar";
 import { CalculationStatusBadge } from "@/components/offer-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -76,20 +77,28 @@ export default async function CalculationPage({
                   ))}
                 </div>
               ) : null}
-              <div className="flex flex-wrap gap-2">
-                <form action={calculateOfferAction.bind(null, id)}>
-                  <Button disabled={!canCalculate}>{dictionary.common.calculate}</Button>
-                </form>
-                <Button nativeButton={false} variant="outline" render={<Link href={`/offers/${id}/scopes-lines`} />}>
-                  {dictionary.calculation.editScopesAndLines}
-                </Button>
-                <Button nativeButton={false} variant="outline" render={<Link href={`/offers/${id}/material-prices`} />}>
-                  {dictionary.calculation.editPrices}
-                </Button>
-              </div>
-              <Button nativeButton={false} variant="outline" render={<Link href={`/offers/${id}/review`} />}>
-                {dictionary.calculation.reviewAndExport}
-              </Button>
+              <PageActionBar
+                primary={
+                  <form action={calculateOfferAction.bind(null, id)}>
+                    <Button aria-label={dictionary.calculation.primaryActionAria} disabled={!canCalculate}>{dictionary.common.calculate}</Button>
+                  </form>
+                }
+                secondary={
+                  <>
+                    <Button nativeButton={false} size="sm" variant="outline" aria-label={dictionary.calculation.editScopesAndLinesAria} render={<Link href={`/offers/${id}/scopes-lines`} />}>
+                      {dictionary.calculation.editScopesAndLines}
+                    </Button>
+                    <Button nativeButton={false} size="sm" variant="outline" aria-label={dictionary.calculation.editPricesAria} render={<Link href={`/offers/${id}/material-prices`} />}>
+                      {dictionary.calculation.editPrices}
+                    </Button>
+                  </>
+                }
+                tertiary={
+                  <Button nativeButton={false} size="sm" variant="ghost" aria-label={dictionary.calculation.reviewAndExportAria} render={<Link href={`/offers/${id}/review`} />}>
+                    {dictionary.calculation.reviewAndExport}
+                  </Button>
+                }
+              />
             </CardContent>
           </Card>
 
