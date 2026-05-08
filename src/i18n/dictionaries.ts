@@ -274,10 +274,6 @@ export const dictionaries = {
       offersByStatus: "Offers by status",
       topOfferValues: "Top offer values",
     },
-    dashboard: {
-      offersByStatus: "پیشنهادها بر اساس وضعیت",
-      topOfferValues: "بیشترین مبالغ پیشنهاد",
-    },
     masterData: {
       title: "Manage Master Data",
       description: "Full CRUD operations for materials, scopes, parts, and MTO rows.",
@@ -600,10 +596,6 @@ export const dictionaries = {
         calculation: "محاسبه",
         "review-export": "بازبینی و خروجی",
       },
-    },
-    dashboard: {
-      offersByStatus: "Offers by status",
-      topOfferValues: "Top offer values",
     },
     dashboard: {
       offersByStatus: "پیشنهادها بر اساس وضعیت",

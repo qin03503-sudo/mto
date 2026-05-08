@@ -109,7 +109,7 @@ export function OfferManagementView({
               <SelectItem value="cancelled">{dictionary.statuses.cancelled}</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={ownerFilter} onValueChange={setOwnerFilter}>
+          <Select value={ownerFilter} onValueChange={(val) => setOwnerFilter(val ?? "all")}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{dictionary.statuses.all}</SelectItem>
