@@ -87,6 +87,9 @@ export default async function CalculationPage({
                   {dictionary.calculation.editPrices}
                 </Button>
               </div>
+              <Button nativeButton={false} variant="outline" render={<Link href={`/offers/${id}/review`} />}>
+                {dictionary.calculation.reviewAndExport}
+              </Button>
             </CardContent>
           </Card>
 

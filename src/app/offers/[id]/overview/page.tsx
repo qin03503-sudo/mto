@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Calculator, Layers3, PackageCheck } from "lucide-react";
+import { Calculator, Layers3, PackageCheck, ShieldCheck } from "lucide-react";
 
 import { AppShell } from "@/components/app-shell";
 import { OfferFlowProgress } from "@/components/offer-flow-progress";
@@ -97,6 +97,12 @@ export default async function OfferOverviewPage({
                 icon={<Calculator className="size-4" />}
                 label={dictionary.offers.calculation}
                 detail={dictionary.overview.calculationDetail.replace("{status}", dictionary.statuses[offer.calculationStatus])}
+              />
+              <WorkflowCard
+                href={`/offers/${offer.id}/review`}
+                icon={<ShieldCheck className="size-4" />}
+                label={dictionary.review.title}
+                detail={dictionary.review.stepDetail}
               />
             </CardContent>
           </Card>

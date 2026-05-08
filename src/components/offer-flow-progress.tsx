@@ -19,7 +19,7 @@ const STEP_PATH: Record<OfferFlowStep, string> = {
   "material-prices": "material-prices",
   "scopes-lines": "scopes-lines",
   calculation: "calculation",
-  "review-export": "calculation",
+  "review-export": "review",
 };
 
 function getStepEnabled(step: OfferFlowStep, completed: Record<OfferFlowStep, boolean>) {
