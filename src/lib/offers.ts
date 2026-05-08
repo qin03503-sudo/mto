@@ -118,7 +118,7 @@ export async function getOfferSummary() {
   }
 
   return {
-    activeOffers: offers.length,
+    activeOffers: offers.filter((offer) => offer.status !== "closed" && offer.status !== "cancelled").length,
     openValue,
     openValueCurrency,
     outdatedCalculations: offers.filter(

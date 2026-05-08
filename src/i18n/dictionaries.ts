@@ -70,6 +70,8 @@ export const dictionaries = {
       heroTitle: "Price busduct proposals with traceable MTO data.",
       heroDescription: "Manage offers, project material prices, scope lines, and calculation output from one focused workspace.",
       language: "Language",
+      dashboard: "Dashboard",
+      manual: "User Manual",
     },
     offers: {
       activeOffers: "Active offers",
@@ -97,6 +99,7 @@ export const dictionaries = {
       custom: "Custom",
       optionalNotes: "Optional notes for the pricing team",
       createOfferTitle: "Create Offer",
+      createFlowHint: "Step 1/3: Create the offer shell. Then configure scopes/lines/parts and material prices before calculation.",
     },
     statuses: {
       all: "All",
@@ -175,6 +178,14 @@ export const dictionaries = {
       runTime: "Run time",
       offerTotal: "Offer total",
       runStatus: "Run status",
+    },
+    dashboard: {
+      offersByStatus: "Offers by status",
+      topOfferValues: "Top offer values",
+    },
+    dashboard: {
+      offersByStatus: "پیشنهادها بر اساس وضعیت",
+      topOfferValues: "بیشترین مبالغ پیشنهاد",
     },
     masterData: {
       title: "Manage Master Data",
@@ -299,6 +310,8 @@ export const dictionaries = {
       heroTitle: "قیمت گذاری پیشنهادهای باسداکت با داده های قابل ردیابی MTO.",
       heroDescription: "پیشنهادها، قیمت متریال پروژه، خطوط Scope و خروجی محاسبه را در یک محیط متمرکز مدیریت کنید.",
       language: "زبان",
+      dashboard: "داشبورد",
+      manual: "راهنمای کاربر",
     },
     offers: {
       activeOffers: "پیشنهادهای فعال",
@@ -326,6 +339,7 @@ export const dictionaries = {
       custom: "سفارشی",
       optionalNotes: "یادداشت اختیاری برای تیم قیمت گذاری",
       createOfferTitle: "ایجاد پیشنهاد",
+      createFlowHint: "گام ۱ از ۳: ابتدا شِمای پیشنهاد را بسازید، سپس Scope/Line/Part و قیمت مواد را تکمیل کنید.",
     },
     statuses: {
       all: "همه",
@@ -404,6 +418,14 @@ export const dictionaries = {
       runTime: "زمان اجرا",
       offerTotal: "مجموع پیشنهاد",
       runStatus: "وضعیت اجرا",
+    },
+    dashboard: {
+      offersByStatus: "Offers by status",
+      topOfferValues: "Top offer values",
+    },
+    dashboard: {
+      offersByStatus: "پیشنهادها بر اساس وضعیت",
+      topOfferValues: "بیشترین مبالغ پیشنهاد",
     },
     masterData: {
       title: "مدیریت داده های پایه",
