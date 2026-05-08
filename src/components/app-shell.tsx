@@ -9,14 +9,17 @@ import {
   BookOpenText,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useI18n, useLocalizedPath } from "@/i18n/client";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { dictionary } = useI18n();
+  const { dictionary, locale } = useI18n();
   const localizePath = useLocalizedPath();
+  const pathname = usePathname();
+
   const navItems = [
     { href: "/offers", label: dictionary.shell.offers, icon: LayoutDashboard },
     { href: "/offers/new", label: dictionary.shell.newOffer, icon: FilePlus2 },
@@ -24,6 +27,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: "/manual", label: dictionary.shell.manual, icon: BookOpenText },
     { href: "/master-data", label: dictionary.shell.masterData, icon: Database },
   ];
+
+  const normalizedPath = pathname.replace(`/${locale}`, "") || "/";
+  const currentNavItem =
+    navItems.find((item) => normalizedPath === item.href || normalizedPath.startsWith(`${item.href}/`)) ?? navItems[0];
 
   return (
     <main className="min-h-screen px-3 py-3 text-foreground sm:px-5 lg:px-7">
@@ -43,12 +50,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <nav className="grid gap-2">
               {navItems.map((item) => {
                 const Icon = item.icon;
+                const isActive = normalizedPath === item.href || normalizedPath.startsWith(`${item.href}/`);
 
                 return (
                   <Button
                     key={item.href}
                     nativeButton={false}
-                    variant="ghost"
+                    variant={isActive ? "secondary" : "ghost"}
                     className="h-10 justify-start rounded-xl text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                     render={<Link href={localizePath(item.href)} />}
                   >
@@ -80,7 +88,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   {dictionary.shell.offerEngineering}
                 </div>
                 <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
-                  {dictionary.shell.heroTitle}
+                  {currentNavItem.label}
                 </h1>
                 <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
                   {dictionary.shell.heroDescription}
