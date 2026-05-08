@@ -10,6 +10,9 @@ import {
   getPartById,
   getScopeById,
   getScopeLineSummary,
+  getScopesByIds,
+  getPartsByIds,
+  getMtoRowsByPartIds,
 } from "@/lib/scopes-lines";
 
 export type CalculationIssue = {
@@ -84,8 +87,29 @@ export async function validateCalculationInputs(offerId: string) {
     });
   }
 
+  const scopeIds = Array.from(new Set(offerScopes.map((os) => os.scopeId)));
+  const partIds = Array.from(
+    new Set(offerScopes.flatMap((os) => os.lines.flatMap((l) => l.parts.map((p) => p.partId))))
+  );
+
+  const [scopes, parts, allMtoRows] = await Promise.all([
+    getScopesByIds(scopeIds),
+    getPartsByIds(partIds),
+    getMtoRowsByPartIds(partIds),
+  ]);
+
+  const scopesById = new Map(scopes.map((s) => [s.id, s]));
+  const partsById = new Map(parts.map((p) => [p.id, p]));
+  const mtoRowsByPartId = new Map<string, typeof allMtoRows>();
+
+  for (const row of allMtoRows) {
+    const rows = mtoRowsByPartId.get(row.partId) ?? [];
+    rows.push(row);
+    mtoRowsByPartId.set(row.partId, rows);
+  }
+
   for (const offerScope of offerScopes) {
-    const scope = await getScopeById(offerScope.scopeId);
+    const scope = scopesById.get(offerScope.scopeId);
 
     if (offerScope.lines.length === 0) {
       issues.push({
@@ -110,7 +134,7 @@ export async function validateCalculationInputs(offerId: string) {
       }
 
       for (const linePart of line.parts) {
-        const part = await getPartById(linePart.partId);
+        const part = partsById.get(linePart.partId);
 
         if (!part || part.scopeId !== offerScope.scopeId) {
           issues.push({
@@ -119,9 +143,7 @@ export async function validateCalculationInputs(offerId: string) {
           });
         }
 
-        const mtoRows = part
-          ? await getMtoRowsForPart(offerScope.scopeId, linePart.partId)
-          : [];
+        const mtoRows = part ? (mtoRowsByPartId.get(linePart.partId) ?? []) : [];
 
         if (part && mtoRows.length === 0) {
           issues.push({
@@ -174,16 +196,37 @@ async function buildCalculationRun(offerId: string): Promise<CalculationRun> {
   const activeVersion = await getActiveMtoVersion();
   const scopeResults: CalculationScopeResult[] = [];
 
+  const scopeIds = Array.from(new Set(offerScopes.map((os) => os.scopeId)));
+  const partIds = Array.from(
+    new Set(offerScopes.flatMap((os) => os.lines.flatMap((l) => l.parts.map((p) => p.partId))))
+  );
+
+  const [scopes, parts, allMtoRows] = await Promise.all([
+    getScopesByIds(scopeIds),
+    getPartsByIds(partIds),
+    getMtoRowsByPartIds(partIds),
+  ]);
+
+  const scopesById = new Map(scopes.map((s) => [s.id, s]));
+  const partsById = new Map(parts.map((p) => [p.id, p]));
+  const mtoRowsByPartId = new Map<string, typeof allMtoRows>();
+
+  for (const row of allMtoRows) {
+    const rows = mtoRowsByPartId.get(row.partId) ?? [];
+    rows.push(row);
+    mtoRowsByPartId.set(row.partId, rows);
+  }
+
   for (const offerScope of offerScopes) {
-    const scope = await getScopeById(offerScope.scopeId);
+    const scope = scopesById.get(offerScope.scopeId);
     const lineResults: CalculationLineResult[] = [];
 
     for (const line of offerScope.lines) {
       const partResults: CalculationPartResult[] = [];
 
       for (const linePart of line.parts) {
-        const part = await getPartById(linePart.partId);
-        const mtoRows = await getMtoRowsForPart(offerScope.scopeId, linePart.partId);
+        const part = partsById.get(linePart.partId);
+        const mtoRows = mtoRowsByPartId.get(linePart.partId) ?? [];
         const details = mtoRows.map((row) => {
           const materialPrice = materialPricesById.get(row.materialId);
           const unitPrice = materialPrice?.projectPrice ?? 0;
