@@ -22,6 +22,35 @@ export type CalculationIssue = {
   message: string;
 };
 
+const BLOCKING_ISSUE_CODES = new Set<string>([
+  "OFFER_NOT_FOUND",
+  "NO_SCOPES",
+  "SCOPE_HAS_NO_LINES",
+  "LINE_NAME_REQUIRED",
+  "LINE_HAS_NO_PARTS",
+  "INVALID_SCOPE_PART",
+  "MISSING_MTO_ROWS",
+  "INVALID_QTY",
+  "INVALID_QUANTITIES",
+  "UNRESOLVED_PRICES",
+]);
+
+function splitCalculationIssues(issues: CalculationIssue[]) {
+  const blocking: CalculationIssue[] = [];
+  const nonBlocking: CalculationIssue[] = [];
+
+  for (const issue of issues) {
+    if (BLOCKING_ISSUE_CODES.has(issue.code)) {
+      blocking.push(issue);
+      continue;
+    }
+
+    nonBlocking.push(issue);
+  }
+
+  return { blocking, nonBlocking };
+}
+
 export type CalculationMtoDetail = {
   mtoRowId: string;
   materialId: string;
@@ -193,13 +222,29 @@ export async function validateCalculationInputs(offerId: string) {
 
 async function buildCalculationRun(offerId: string): Promise<CalculationRun> {
   const issues = await validateCalculationInputs(offerId);
+  const { blocking, nonBlocking } = splitCalculationIssues(issues);
   const offer = await getOfferById(offerId);
   const currency = normalizeCurrency(offer?.currency ?? defaultCurrency);
+  const activeVersion = await getActiveMtoVersion();
+
+  if (blocking.length > 0) {
+    return {
+      id: `run-${offerId}-${Date.now()}`,
+      offerId,
+      mtoVersionId: activeVersion?.id ?? "no-approved-mto-version",
+      runAt: new Date().toISOString(),
+      status: "failed",
+      total: 0,
+      currency,
+      issues: [...blocking, ...nonBlocking],
+      scopes: [],
+    };
+  }
+
   const offerScopes = await getOfferScopes(offerId);
   const materialPricesById = new Map(
     (await getMaterialPricesForOffer(offerId)).map((price) => [price.materialId, price])
   );
-  const activeVersion = await getActiveMtoVersion();
   const scopeResults: CalculationScopeResult[] = [];
 
   const scopeIds = Array.from(new Set(offerScopes.map((os) => os.scopeId)));
@@ -235,18 +280,22 @@ async function buildCalculationRun(offerId: string): Promise<CalculationRun> {
         const mtoRows = mtoRowsByPartId.get(linePart.partId) ?? [];
         const details = await Promise.all(mtoRows.map(async (row) => {
           const materialPrice = materialPricesById.get(row.materialId);
+          if (!materialPrice || materialPrice.projectPrice === null) {
+            throw new Error(`UNRESOLVED_PRICE:${row.materialId}`);
+          }
+
           const unitPrice = await convertMoney(
-            materialPrice?.projectPrice ?? 0,
-            materialPrice?.projectCurrency ?? currency,
+            materialPrice.projectPrice,
+            materialPrice.projectCurrency,
             currency
           );
 
           return {
             mtoRowId: row.id,
             materialId: row.materialId,
-            materialName: materialPrice?.material ?? "Unknown material",
-            dimension: materialPrice?.dimension ?? "",
-            unit: materialPrice?.unit ?? "",
+            materialName: materialPrice.material,
+            dimension: materialPrice.dimension,
+            unit: materialPrice.unit,
             value: row.value,
             unitPrice,
             total: row.value * unitPrice,
