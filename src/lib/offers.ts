@@ -98,7 +98,7 @@ export async function addOffer(offer: Offer) {
 
 export async function updateOffer(
   offerId: string,
-  updates: Partial<Pick<Offer, "calculationStatus" | "lines" | "scopes" | "total">>
+  updates: Partial<Pick<Offer, "status" | "calculationStatus" | "lines" | "scopes" | "total">>
 ) {
   const updated = await prisma.offer.update({
     where: { id: offerId },
