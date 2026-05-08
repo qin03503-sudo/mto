@@ -5,6 +5,8 @@ import {
   Database,
   FilePlus2,
   LayoutDashboard,
+  BarChart3,
+  BookOpenText,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -18,6 +20,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: "/offers", label: dictionary.shell.offers, icon: LayoutDashboard },
     { href: "/offers/new", label: dictionary.shell.newOffer, icon: FilePlus2 },
+    { href: "/dashboard", label: dictionary.shell.dashboard, icon: BarChart3 },
+    { href: "/manual", label: dictionary.shell.manual, icon: BookOpenText },
     { href: "/master-data", label: dictionary.shell.masterData, icon: Database },
   ];
 

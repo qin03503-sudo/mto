@@ -39,6 +39,7 @@ export default async function NewOfferPage({
             <CardTitle>{dictionary.offers.createOfferTitle}</CardTitle>
           </CardHeader>
           <CardContent>
+            <div className="mb-5 rounded-xl border bg-muted/40 p-4 text-sm text-muted-foreground">{dictionary.offers.createFlowHint}</div>
             <form action={createOfferAction} className="grid gap-5">
               <div className="grid gap-2">
                 <Label htmlFor="name">{dictionary.offers.offerName}</Label>
