@@ -16,10 +16,11 @@ export async function POST(
 
   const run = await calculateOffer(id);
 
-  await updateOffer(id, {
-    calculationStatus: run.status,
-    total: run.total,
-  });
+  await updateOffer(id,
+    run.status === "current"
+      ? { calculationStatus: run.status, total: run.total }
+      : { calculationStatus: run.status }
+  );
 
   return NextResponse.json(
     { data: run },
