@@ -10,8 +10,10 @@ export default async function ReportsPage() {
     <AppShell>
       <OfferManagementView
         offers={offers}
+        savedFilters={{ status: "all", date: "all" }}
+        showKpis
         title={dictionary.management.reportsTitle}
-        description={`${dictionary.management.reportsDescription} · ${summary.activeOffers} ${dictionary.offers.activeOffers.toLowerCase()}`}
+        description={`${dictionary.management.reportsDescription} · ${summary.activeOffers} ${dictionary.offers.activeOffers.toLowerCase()} · ${summary.outdatedCalculations} ${dictionary.offers.outdatedCalculations.toLowerCase()}`}
         emptyTitle={dictionary.management.reportsEmptyTitle}
         emptyDescription={dictionary.management.reportsEmptyDescription}
       />

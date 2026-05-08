@@ -14,6 +14,7 @@ import { formatMoney } from "@/lib/currency";
 import type { Offer, OfferStatus } from "@/lib/offers";
 
 type SortKey = "due" | "value" | "updated";
+type DateFilter = "all" | "7" | "14";
 
 export function OfferManagementView({
   offers,
@@ -21,17 +22,25 @@ export function OfferManagementView({
   description,
   emptyTitle,
   emptyDescription,
+  savedFilters,
+  showKpis = false,
 }: {
   offers: Offer[];
   title: string;
   description: string;
   emptyTitle: string;
   emptyDescription: string;
+  savedFilters?: {
+    status?: "all" | OfferStatus;
+    owner?: "all" | string;
+    date?: DateFilter;
+  };
+  showKpis?: boolean;
 }) {
   const { dictionary, locale } = useI18n();
-  const [statusFilter, setStatusFilter] = useState<"all" | OfferStatus>("all");
-  const [ownerFilter, setOwnerFilter] = useState<"all" | string>("all");
-  const [dateFilter, setDateFilter] = useState<"all" | "7" | "14">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | OfferStatus>(savedFilters?.status ?? "all");
+  const [ownerFilter, setOwnerFilter] = useState<"all" | string>(savedFilters?.owner ?? "all");
+  const [dateFilter, setDateFilter] = useState<DateFilter>(savedFilters?.date ?? "all");
   const [sort, setSort] = useState<SortKey>("due");
   const [now] = useState(() => Date.now());
 
@@ -61,7 +70,15 @@ export function OfferManagementView({
 
         return new Date(left.closeDate).getTime() - new Date(right.closeDate).getTime();
       });
-  }, [dateFilter, offers, ownerFilter, sort, statusFilter]);
+  }, [dateFilter, now, offers, ownerFilter, sort, statusFilter]);
+
+  const kpis = useMemo(() => {
+    const openCount = visibleOffers.filter((offer) => offer.status !== "closed" && offer.status !== "cancelled").length;
+    const totalValue = visibleOffers.reduce((sum, offer) => sum + offer.total, 0);
+    const outdated = visibleOffers.filter((offer) => offer.calculationStatus === "outdated").length;
+
+    return { openCount, totalValue, outdated };
+  }, [visibleOffers]);
 
   return (
     <Card className="shadow-sm">
@@ -123,6 +140,28 @@ export function OfferManagementView({
           <Button type="button" size="sm">{dictionary.management.bulkMarkStatus}</Button>
         </div>
 
+        {showKpis ? (
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Card>
+              <CardHeader className="pb-2"><CardDescription>{dictionary.offers.activeOffers}</CardDescription></CardHeader>
+              <CardContent className="pt-0 text-2xl font-semibold">{kpis.openCount}</CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2"><CardDescription>{dictionary.offers.openValue}</CardDescription></CardHeader>
+              <CardContent className="pt-0 text-2xl font-semibold">{formatMoney(kpis.totalValue, "USD", locale, 0)}</CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2"><CardDescription>{dictionary.offers.outdatedCalculations}</CardDescription></CardHeader>
+              <CardContent className="pt-0 text-2xl font-semibold">{kpis.outdated}</CardContent>
+            </Card>
+          </div>
+        ) : null}
+
+        <div className="rounded-lg border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
+          <span className="font-medium">{dictionary.management.emptyStateGuidanceLabel} </span>
+          {dictionary.management.emptyStateGuidance}
+        </div>
+
         <div className="overflow-hidden rounded-xl border">
           <Table>
             <TableHeader>
@@ -133,12 +172,13 @@ export function OfferManagementView({
                 <TableHead>{dictionary.common.owner}</TableHead>
                 <TableHead>{dictionary.common.closeDate}</TableHead>
                 <TableHead className="text-right">{dictionary.common.total}</TableHead>
+                <TableHead className="text-right">{dictionary.common.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {visibleOffers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
                     <div className="space-y-1">
                       <p className="font-medium">{emptyTitle}</p>
                       <p>{emptyDescription}</p>
@@ -158,6 +198,19 @@ export function OfferManagementView({
                     <TableCell>{offer.owner}</TableCell>
                     <TableCell>{offer.closeDate}</TableCell>
                     <TableCell className="text-right">{formatMoney(offer.total, offer.currency, locale, 0)}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button size="sm" variant="outline" nativeButton={false} render={<Link href={`/offers/${offer.id}/overview`} />}>
+                          {dictionary.management.quickOpen}
+                        </Button>
+                        <Button size="sm" variant="outline" nativeButton={false} render={<Link href={`/offers/${offer.id}/calculation`} />}>
+                          {dictionary.management.quickCalculate}
+                        </Button>
+                        <Button size="sm" variant="ghost" nativeButton={false} render={<Link href={`/offers/${offer.id}/review`} />}>
+                          {dictionary.management.quickMarkStatus}
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))
               )}

@@ -11,6 +11,7 @@ export default async function OffersReadyPage() {
     <AppShell>
       <OfferManagementView
         offers={filtered}
+        savedFilters={{ status: "ready", date: "14" }}
         title={dictionary.management.readyTitle}
         description={dictionary.management.readyDescription}
         emptyTitle={dictionary.management.readyEmptyTitle}
