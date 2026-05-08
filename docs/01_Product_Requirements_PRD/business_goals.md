@@ -12,3 +12,8 @@ Goals:
 - Keep base data for materials, scopes, parts, and MTO rows out of hard-coded application logic.
 - Make final prices traceable back to MTO rows and project material prices.
 - Prepare the system for future CU scopes and new MTO versions.
+- **Convert the current Excel MTO workflow into a structured and maintainable software system.**
+- **Create and manage projects or pricing offers.**
+- **Calculate part unit prices automatically from scope, part, MTO value, and material unit price.**
+- **Produce a final pricing output similar to the current Excel Pivot Table.**
+- **Prepare the system for future access control, CU support, advanced reporting, and price/version management.**

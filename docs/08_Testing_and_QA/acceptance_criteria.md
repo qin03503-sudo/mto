@@ -9,19 +9,15 @@ Calculation acceptance tests:
 | `TOP OFF BOX 250`, qty `2` | `440,640,000` |
 | Example Line sheet grand total | `7,766,115,132.90` |
 
-Functional acceptance criteria:
+Functional acceptance criteria (based on PRD Section 16):
 
-- User can create an offer with name, offer number, input date, and close date.
-- Creating an offer copies default material prices into project-specific prices.
-- Changing material price in Project A does not affect Project B.
-- User can select one or more scopes for an offer.
-- User can create multiple lines under each selected scope.
-- User can add multiple parts and quantities under each line.
-- User cannot select a part that does not belong to the selected scope.
-- System calculates part unit price from the selected scope, selected part, MTO Master, and project material prices.
-- System calculates line item total price from quantity and calculated unit price.
-- System displays totals for each line, each scope, and the whole offer/project.
-- Calculation output is grouped by scope, line, and part.
-- Recalculation stores a new calculation run.
-- Previous calculation result can be audited after recalculation.
-- Missing MTO records for a selected scope and part produce a clear user-facing error.
+- **AC-001:** User can create a new project with name, offer number, input date, and close date.
+- **AC-002:** After creating a project, the system automatically creates project-specific material prices copied from the base material table.
+- **AC-003:** User can select one or more scopes for an offer/project.
+- **AC-004:** User can create multiple lines under each scope.
+- **AC-005:** User can add multiple parts and quantities to each line.
+- **AC-006:** System can calculate the unit price for each part based on the scope and MTO Master.
+- **AC-007:** System can calculate the total price of each part based on quantity.
+- **AC-008:** System can display the total price for each line, each scope, and the whole project.
+- **AC-009:** If a combination of Scope and Part does not exist in MTO, the system displays an understandable error message.
+- **AC-010:** Changing a material price in one project must not affect other projects or the base material price.
