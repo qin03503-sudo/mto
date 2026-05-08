@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { ArrowUpDown, CalendarClock, CircleDollarSign, Layers3, UserRound } from "lucide-react";
 
 import { OfferStatusBadge, CalculationStatusBadge } from "@/components/offer-status-badge";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +39,7 @@ export function OfferManagementView({
   showKpis?: boolean;
 }) {
   const { dictionary, locale } = useI18n();
+  const toLocalPath = (path: string) => `/${locale}${path}`;
   const [statusFilter, setStatusFilter] = useState<"all" | OfferStatus>(savedFilters?.status ?? "all");
   const [ownerFilter, setOwnerFilter] = useState<"all" | string>(savedFilters?.owner ?? "all");
   const [dateFilter, setDateFilter] = useState<DateFilter>(savedFilters?.date ?? "all");
@@ -81,7 +83,7 @@ export function OfferManagementView({
   }, [visibleOffers]);
 
   return (
-    <Card className="shadow-sm">
+    <Card className="overflow-hidden border-border/80 shadow-sm">
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -96,9 +98,12 @@ export function OfferManagementView({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid gap-2 md:grid-cols-4">
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
           <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as "all" | OfferStatus)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-10">
+              <Layers3 className="size-4 text-muted-foreground" />
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{dictionary.statuses.all}</SelectItem>
               <SelectItem value="draft">{dictionary.statuses.draft}</SelectItem>
@@ -117,7 +122,10 @@ export function OfferManagementView({
             </SelectContent>
           </Select>
           <Select value={dateFilter} onValueChange={(value) => setDateFilter(value as "all" | "7" | "14")}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-10">
+              <CalendarClock className="size-4 text-muted-foreground" />
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{dictionary.management.anyDate}</SelectItem>
               <SelectItem value="7">{dictionary.management.next7Days}</SelectItem>
@@ -125,7 +133,10 @@ export function OfferManagementView({
             </SelectContent>
           </Select>
           <Select value={sort} onValueChange={(value) => setSort(value as SortKey)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-10">
+              <ArrowUpDown className="size-4 text-muted-foreground" />
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="due">{dictionary.management.sortDueDate}</SelectItem>
               <SelectItem value="value">{dictionary.management.sortValue}</SelectItem>
@@ -148,7 +159,7 @@ export function OfferManagementView({
             </Card>
             <Card>
               <CardHeader className="pb-2"><CardDescription>{dictionary.offers.openValue}</CardDescription></CardHeader>
-              <CardContent className="pt-0 text-2xl font-semibold">{formatMoney(kpis.totalValue, "USD", locale, 0)}</CardContent>
+              <CardContent className="flex items-center gap-2 pt-0 text-2xl font-semibold"><CircleDollarSign className="size-5 text-chart-2" />{formatMoney(kpis.totalValue, "USD", locale, 0)}</CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2"><CardDescription>{dictionary.offers.outdatedCalculations}</CardDescription></CardHeader>
@@ -162,7 +173,7 @@ export function OfferManagementView({
           {dictionary.management.emptyStateGuidance}
         </div>
 
-        <div className="overflow-hidden rounded-xl border">
+        <div className="overflow-x-auto rounded-xl border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -189,7 +200,7 @@ export function OfferManagementView({
                 visibleOffers.map((offer) => (
                   <TableRow key={offer.id}>
                     <TableCell>
-                      <Link className="font-medium hover:underline" href={`/offers/${offer.id}/overview`}>
+                      <Link className="font-medium hover:underline" href={toLocalPath(`/offers/${offer.id}/overview`)}>
                         {offer.name}
                       </Link>
                     </TableCell>
@@ -200,13 +211,13 @@ export function OfferManagementView({
                     <TableCell className="text-right">{formatMoney(offer.total, offer.currency, locale, 0)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button size="sm" variant="outline" nativeButton={false} render={<Link href={`/offers/${offer.id}/overview`} />}>
+                        <Button size="sm" variant="outline" nativeButton={false} render={<Link href={toLocalPath(`/offers/${offer.id}/overview`)} />}>
                           {dictionary.management.quickOpen}
                         </Button>
-                        <Button size="sm" variant="outline" nativeButton={false} render={<Link href={`/offers/${offer.id}/calculation`} />}>
+                        <Button size="sm" variant="outline" nativeButton={false} render={<Link href={toLocalPath(`/offers/${offer.id}/calculation`)} />}>
                           {dictionary.management.quickCalculate}
                         </Button>
-                        <Button size="sm" variant="ghost" nativeButton={false} render={<Link href={`/offers/${offer.id}/review`} />}>
+                        <Button size="sm" variant="ghost" nativeButton={false} render={<Link href={toLocalPath(`/offers/${offer.id}/review`)} />}>
                           {dictionary.management.quickMarkStatus}
                         </Button>
                       </div>
