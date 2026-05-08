@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import { defaultCurrency, normalizeCurrency, type PriceCurrency } from "@/lib/currency";
+import { convertMoney } from "@/lib/exchange-rates";
 
 import type { Offer, OfferStatus, CalculationStatus } from "./types";
 
@@ -16,6 +18,7 @@ export const seedOffers: Offer[] = [
     status: "pricing",
     calculationStatus: "outdated",
     description: "Busduct package for the metro line expansion tender.",
+    currency: defaultCurrency,
     scopes: 2,
     lines: 2,
     total: 428500,
@@ -31,6 +34,7 @@ export const seedOffers: Offer[] = [
     status: "pricing",
     calculationStatus: "not_calculated",
     description: "Custom package requiring hospital tower material overrides.",
+    currency: defaultCurrency,
     scopes: 1,
     lines: 1,
     total: 184200,
@@ -46,6 +50,7 @@ export const seedOffers: Offer[] = [
     status: "ready",
     calculationStatus: "current",
     description: "Ready customer output for airport service building review.",
+    currency: defaultCurrency,
     scopes: 0,
     lines: 0,
     total: 612900,
@@ -63,12 +68,14 @@ function toOffer(offer: {
   status: string;
   calculationStatus: string;
   description: string;
+  currency: string;
   scopes: number;
   lines: number;
   total: number;
 }): Offer {
   return {
     ...offer,
+    currency: normalizeCurrency(offer.currency),
     type: offer.type === "custom" ? "custom" : "standard",
     status: offer.status as OfferStatus,
     calculationStatus: offer.calculationStatus as CalculationStatus,
@@ -103,10 +110,17 @@ export async function updateOffer(
 
 export async function getOfferSummary() {
   const offers = await getOffers();
+  const openValueCurrency: PriceCurrency = defaultCurrency;
+  let openValue = 0;
+
+  for (const offer of offers) {
+    openValue += await convertMoney(offer.total, offer.currency, openValueCurrency);
+  }
 
   return {
     activeOffers: offers.length,
-    openValue: offers.reduce((sum, offer) => sum + offer.total, 0),
+    openValue,
+    openValueCurrency,
     outdatedCalculations: offers.filter(
       (offer) => offer.calculationStatus === "outdated"
     ).length,

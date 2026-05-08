@@ -18,6 +18,7 @@ model Offer {
   status            String
   calculationStatus String
   description       String
+  currency          String                 @default("USD")
   scopes            Int                    @default(0)
   lines             Int                    @default(0)
   total             Float                  @default(0)
@@ -41,6 +42,7 @@ model Material {
   dimension     String
   unitId        String
   defaultPrice  Float?
+  defaultCurrency String              @default("USD")
   unit          Unit                   @relation(fields: [unitId], references: [id])
   mtoRows       MtoRow[]
   projectPrices ProjectMaterialPrice[]
@@ -90,7 +92,9 @@ model ProjectMaterialPrice {
   offerId      String
   materialId   String
   defaultPrice Float
+  defaultCurrency String   @default("USD")
   projectPrice Float?
+  projectCurrency String   @default("USD")
   isOverridden Boolean  @default(false)
   offer        Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
   material     Material @relation(fields: [materialId], references: [id])
@@ -133,6 +137,7 @@ model CalculationRun {
   runAt        String
   status       String
   total        Float
+  currency     String   @default("USD")
   payload      String
   offer        Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
 }

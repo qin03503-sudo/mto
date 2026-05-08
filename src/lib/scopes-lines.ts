@@ -1,6 +1,8 @@
 import { getMaterialPricesForOffer } from "@/lib/material-prices";
-import { updateOffer } from "@/lib/offers";
+import { getOfferById } from "@/lib/offers";
 import { prisma } from "@/lib/prisma";
+import { convertMoney } from "@/lib/exchange-rates";
+import { defaultCurrency, normalizeCurrency } from "@/lib/currency";
 
 export type Scope = {
   id: string;
@@ -241,16 +243,26 @@ export async function getPartUnitPrice(
   scopeId: string,
   partId: string
 ) {
+  const offer = await getOfferById(offerId);
+  const currency = normalizeCurrency(offer?.currency ?? defaultCurrency);
   const materialPricesById = new Map(
     (await getMaterialPricesForOffer(offerId)).map((price) => [price.materialId, price])
   );
   const rows = await getMtoRowsForPart(scopeId, partId);
+  let total = 0;
 
-  return rows.reduce((sum, row) => {
+  for (const row of rows) {
     const materialPrice = materialPricesById.get(row.materialId);
+    const unitPrice = await convertMoney(
+      materialPrice?.projectPrice ?? 0,
+      materialPrice?.projectCurrency ?? currency,
+      currency
+    );
 
-    return sum + row.value * (materialPrice?.projectPrice ?? 0);
-  }, 0);
+    total += row.value * unitPrice;
+  }
+
+  return total;
 }
 
 export async function getScopeLineSummary(offerId: string) {

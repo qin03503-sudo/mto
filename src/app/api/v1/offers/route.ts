@@ -8,6 +8,7 @@ import {
 } from "@/lib/offer-utils";
 import { initializeProjectMaterialPrices } from "@/lib/material-prices";
 import { addOffer } from "@/lib/offers";
+import { defaultCurrency, normalizeCurrency } from "@/lib/currency";
 
 export async function GET() {
   const offers = await getOffers();
@@ -26,6 +27,7 @@ export async function POST(request: Request) {
     input_date?: unknown;
     close_date?: unknown;
     description?: unknown;
+    currency?: unknown;
   };
   const input: CreateOfferInput = {
     name: typeof body.name === "string" ? body.name : "",
@@ -34,6 +36,7 @@ export async function POST(request: Request) {
     inputDate: typeof body.input_date === "string" ? body.input_date : "",
     closeDate: typeof body.close_date === "string" ? body.close_date : "",
     description: typeof body.description === "string" ? body.description : "",
+    currency: normalizeCurrency(body.currency ?? defaultCurrency),
   };
   const errors = await validateCreateOffer(input);
 

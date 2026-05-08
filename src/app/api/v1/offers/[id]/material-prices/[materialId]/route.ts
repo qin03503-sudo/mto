@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getOfferById, updateOffer } from "@/lib/offers";
 import { updateProjectMaterialPrice } from "@/lib/material-prices";
+import { isPriceCurrency } from "@/lib/currency";
 
 export async function PUT(
   request: Request,
@@ -14,7 +15,7 @@ export async function PUT(
     return NextResponse.json({ error: "Offer not found" }, { status: 404 });
   }
 
-  const body = (await request.json()) as { unit_price?: unknown };
+  const body = (await request.json()) as { unit_price?: unknown; currency?: unknown };
   const unitPrice = Number(body.unit_price);
 
   if (!Number.isFinite(unitPrice) || unitPrice < 0) {
@@ -24,7 +25,14 @@ export async function PUT(
     );
   }
 
-  const material = await updateProjectMaterialPrice(id, materialId, unitPrice);
+  if (!isPriceCurrency(body.currency)) {
+    return NextResponse.json(
+      { error: "currency must be USD, EUR, or IRR" },
+      { status: 400 }
+    );
+  }
+
+  const material = await updateProjectMaterialPrice(id, materialId, unitPrice, body.currency);
 
   if (!material) {
     return NextResponse.json({ error: "Material not found" }, { status: 404 });

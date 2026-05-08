@@ -1,3 +1,5 @@
+import type { PriceCurrency } from "@/lib/currency";
+
 export type OfferStatus =
   | "draft"
   | "pricing"
@@ -23,6 +25,7 @@ export type Offer = {
   status: OfferStatus;
   calculationStatus: CalculationStatus;
   description: string;
+  currency: PriceCurrency;
   scopes: number;
   lines: number;
   total: number;

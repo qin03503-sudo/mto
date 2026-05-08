@@ -4,6 +4,8 @@ import {
 import { getActiveMtoVersion } from "@/lib/master-data";
 import { getOfferById } from "@/lib/offers";
 import { prisma } from "@/lib/prisma";
+import { defaultCurrency, normalizeCurrency, type PriceCurrency } from "@/lib/currency";
+import { convertMoney } from "@/lib/exchange-rates";
 import {
   getOfferScopes,
   getMtoRowsForPart,
@@ -29,6 +31,7 @@ export type CalculationMtoDetail = {
   value: number;
   unitPrice: number;
   total: number;
+  currency: PriceCurrency;
 };
 
 export type CalculationPartResult = {
@@ -61,6 +64,7 @@ export type CalculationRun = {
   runAt: string;
   status: "current" | "outdated" | "failed";
   total: number;
+  currency: PriceCurrency;
   issues: CalculationIssue[];
   scopes: CalculationScopeResult[];
 };
@@ -189,6 +193,8 @@ export async function validateCalculationInputs(offerId: string) {
 
 async function buildCalculationRun(offerId: string): Promise<CalculationRun> {
   const issues = await validateCalculationInputs(offerId);
+  const offer = await getOfferById(offerId);
+  const currency = normalizeCurrency(offer?.currency ?? defaultCurrency);
   const offerScopes = await getOfferScopes(offerId);
   const materialPricesById = new Map(
     (await getMaterialPricesForOffer(offerId)).map((price) => [price.materialId, price])
@@ -227,9 +233,13 @@ async function buildCalculationRun(offerId: string): Promise<CalculationRun> {
       for (const linePart of line.parts) {
         const part = partsById.get(linePart.partId);
         const mtoRows = mtoRowsByPartId.get(linePart.partId) ?? [];
-        const details = mtoRows.map((row) => {
+        const details = await Promise.all(mtoRows.map(async (row) => {
           const materialPrice = materialPricesById.get(row.materialId);
-          const unitPrice = materialPrice?.projectPrice ?? 0;
+          const unitPrice = await convertMoney(
+            materialPrice?.projectPrice ?? 0,
+            materialPrice?.projectCurrency ?? currency,
+            currency
+          );
 
           return {
             mtoRowId: row.id,
@@ -240,8 +250,9 @@ async function buildCalculationRun(offerId: string): Promise<CalculationRun> {
             value: row.value,
             unitPrice,
             total: row.value * unitPrice,
+            currency,
           };
-        });
+        }));
         const unitPrice = details.reduce((sum, row) => sum + row.total, 0);
         const total = unitPrice * linePart.qty;
 
@@ -284,6 +295,7 @@ async function buildCalculationRun(offerId: string): Promise<CalculationRun> {
     runAt: new Date().toISOString(),
     status: issues.length > 0 ? "failed" : "current",
     total,
+    currency,
     issues,
     scopes: scopeResults,
   };
@@ -300,6 +312,7 @@ export async function calculateOffer(offerId: string): Promise<CalculationRun> {
       runAt: run.runAt,
       status: run.status,
       total: run.total,
+      currency: run.currency,
       payload: JSON.stringify(run),
     },
   });

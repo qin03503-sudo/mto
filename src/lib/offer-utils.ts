@@ -1,4 +1,5 @@
 import type { Offer } from "./types";
+import { defaultCurrency, normalizeCurrency, type PriceCurrency } from "@/lib/currency";
 
 export type CreateOfferInput = {
   name: string;
@@ -7,6 +8,7 @@ export type CreateOfferInput = {
   inputDate: string;
   closeDate: string;
   description: string;
+  currency: PriceCurrency;
 };
 
 export function buildCreatedOffer(input: CreateOfferInput): Offer {
@@ -24,6 +26,7 @@ export function buildCreatedOffer(input: CreateOfferInput): Offer {
     status: "draft",
     calculationStatus: "not_calculated",
     description: input.description,
+    currency: input.currency,
     scopes: 0,
     lines: 0,
     total: 0,
@@ -40,5 +43,6 @@ export function createOfferInputFromFormData(formData: FormData): CreateOfferInp
     inputDate: String(formData.get("input_date") ?? ""),
     closeDate: String(formData.get("close_date") ?? ""),
     description: String(formData.get("description") ?? ""),
+    currency: normalizeCurrency(formData.get("currency") ?? defaultCurrency),
   };
 }

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { defaultCurrency, normalizeCurrency, type PriceCurrency } from "@/lib/currency";
 
 export type MaterialPrice = {
   materialId: string;
@@ -6,14 +7,18 @@ export type MaterialPrice = {
   dimension: string;
   unit: string;
   defaultPrice: number;
+  defaultCurrency: PriceCurrency;
   projectPrice: number | null;
+  projectCurrency: PriceCurrency;
   isOverridden: boolean;
 };
 
 function toMaterialPrice(price: {
   materialId: string;
   defaultPrice: number;
+  defaultCurrency: string;
   projectPrice: number | null;
+  projectCurrency: string;
   isOverridden: boolean;
   material: {
     name: string;
@@ -27,7 +32,9 @@ function toMaterialPrice(price: {
     dimension: price.material.dimension,
     unit: price.material.unit.symbol,
     defaultPrice: price.defaultPrice,
+    defaultCurrency: normalizeCurrency(price.defaultCurrency),
     projectPrice: price.projectPrice,
+    projectCurrency: normalizeCurrency(price.projectCurrency),
     isOverridden: price.isOverridden,
   };
 }
@@ -46,7 +53,9 @@ export async function initializeProjectMaterialPrices(
         offerId,
         materialId: material.id,
         defaultPrice: material.defaultPrice ?? 0,
+        defaultCurrency: normalizeCurrency(material.defaultCurrency),
         projectPrice: material.defaultPrice,
+        projectCurrency: normalizeCurrency(material.defaultCurrency),
         isOverridden: false,
       })),
     });
@@ -74,8 +83,10 @@ export async function getMaterialPricesForOffer(
 export async function updateProjectMaterialPrice(
   offerId: string,
   materialId: string,
-  projectPrice: number
+  projectPrice: number,
+  projectCurrencyInput: unknown = defaultCurrency
 ) {
+  const projectCurrency = normalizeCurrency(projectCurrencyInput);
   const existing = await prisma.projectMaterialPrice.findUnique({
     where: { offerId_materialId: { offerId, materialId } },
     include: { material: { include: { unit: true } } },
@@ -89,7 +100,10 @@ export async function updateProjectMaterialPrice(
     where: { offerId_materialId: { offerId, materialId } },
     data: {
       projectPrice,
-      isOverridden: projectPrice !== existing.defaultPrice,
+      projectCurrency,
+      isOverridden:
+        projectPrice !== existing.defaultPrice ||
+        projectCurrency !== normalizeCurrency(existing.defaultCurrency),
     },
     include: { material: { include: { unit: true } } },
   });

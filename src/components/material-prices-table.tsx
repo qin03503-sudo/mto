@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatMoney, isPriceCurrency, priceCurrencies } from "@/lib/currency";
 import type { MaterialPrice } from "@/lib/material-prices";
 
 export function MaterialPricesTable({
@@ -25,9 +26,6 @@ export function MaterialPricesTable({
   prices: MaterialPrice[];
 }) {
   const { dictionary, locale } = useI18n();
-  const numberFormatter = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US", {
-    maximumFractionDigits: 2,
-  });
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [changedOnly, setChangedOnly] = useState(false);
@@ -40,6 +38,11 @@ export function MaterialPricesTable({
       ])
     )
   );
+  const [draftCurrencies, setDraftCurrencies] = useState(() =>
+    Object.fromEntries(
+      prices.map((price) => [price.materialId, price.projectCurrency])
+    )
+  );
   const [savingMaterialId, setSavingMaterialId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
@@ -48,7 +51,7 @@ export function MaterialPricesTable({
     const matchesChanged = !changedOnly || price.isOverridden;
     const matchesQuery =
       deferredQuery.length === 0 ||
-      [price.material, price.dimension, price.unit]
+      [price.material, price.dimension, price.unit, price.defaultCurrency, price.projectCurrency]
         .join(" ")
         .toLowerCase()
         .includes(deferredQuery);
@@ -58,11 +61,17 @@ export function MaterialPricesTable({
 
   async function saveProjectPrice(materialId: string) {
     const unitPrice = Number(draftPrices[materialId]);
+    const currency = draftCurrencies[materialId];
 
     setError(null);
 
     if (!Number.isFinite(unitPrice) || unitPrice < 0) {
       setError(dictionary.materialPrices.projectPriceInvalid);
+      return;
+    }
+
+    if (!isPriceCurrency(currency)) {
+      setError(dictionary.materialPrices.projectCurrencyInvalid);
       return;
     }
 
@@ -73,7 +82,7 @@ export function MaterialPricesTable({
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ unit_price: unitPrice }),
+        body: JSON.stringify({ unit_price: unitPrice, currency }),
       }
     );
 
@@ -93,6 +102,10 @@ export function MaterialPricesTable({
         row.materialId === materialId ? payload.data as MaterialPrice : row
       )
     );
+    setDraftCurrencies((current) => ({
+      ...current,
+      [materialId]: payload.data.projectCurrency,
+    }));
     setSavingMaterialId(null);
     startTransition(() => router.refresh());
   }
@@ -152,9 +165,9 @@ export function MaterialPricesTable({
                   </TableCell>
                   <TableCell>{price.unit}</TableCell>
                   <TableCell className="text-right">
-                    {numberFormatter.format(price.defaultPrice)}
+                    {formatMoney(price.defaultPrice, price.defaultCurrency, locale)}
                   </TableCell>
-                  <TableCell className="min-w-[180px] text-right">
+                  <TableCell className="min-w-[250px] text-right">
                     <div className="flex items-center justify-end gap-2">
                       {price.projectPrice === null ? (
                         <Badge variant="destructive">{dictionary.common.unresolved}</Badge>
@@ -172,7 +185,24 @@ export function MaterialPricesTable({
                             [price.materialId]: event.target.value,
                           }))
                         }
-                      />
+                        />
+                      <select
+                        aria-label={dictionary.common.currency}
+                        className="h-8 rounded-md border border-input bg-transparent px-2 text-sm"
+                        value={draftCurrencies[price.materialId] ?? price.projectCurrency}
+                        onChange={(event) =>
+                          setDraftCurrencies((current) => ({
+                            ...current,
+                            [price.materialId]: event.target.value,
+                          }))
+                        }
+                      >
+                        {priceCurrencies.map((currency) => (
+                          <option key={currency} value={currency}>
+                            {currency}
+                          </option>
+                        ))}
+                      </select>
                       <Button
                         size="sm"
                         variant="outline"

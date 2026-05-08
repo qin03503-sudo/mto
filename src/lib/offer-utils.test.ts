@@ -10,6 +10,7 @@ describe("buildCreatedOffer", () => {
     inputDate: "2026-01-01",
     closeDate: "2026-01-15",
     description: "A test offer description",
+    currency: "EUR",
   };
 
   test("correctly maps input fields to the offer object", () => {
@@ -21,6 +22,7 @@ describe("buildCreatedOffer", () => {
     assert.strictEqual(result.inputDate, baseInput.inputDate);
     assert.strictEqual(result.closeDate, baseInput.closeDate);
     assert.strictEqual(result.description, baseInput.description);
+    assert.strictEqual(result.currency, baseInput.currency);
   });
 
   test("initializes default fields correctly", () => {
