@@ -11,6 +11,7 @@ export default async function OffersStalePage() {
     <AppShell>
       <OfferManagementView
         offers={filtered}
+        savedFilters={{ status: "pricing", date: "7" }}
         title={dictionary.management.staleTitle}
         description={dictionary.management.staleDescription}
         emptyTitle={dictionary.management.staleEmptyTitle}

@@ -11,6 +11,7 @@ export default async function OffersInboxPage() {
     <AppShell>
       <OfferManagementView
         offers={filtered}
+        savedFilters={{ status: "pricing", date: "14" }}
         title={dictionary.management.inboxTitle}
         description={dictionary.management.inboxDescription}
         emptyTitle={dictionary.management.inboxEmptyTitle}

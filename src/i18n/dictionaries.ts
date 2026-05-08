@@ -134,6 +134,11 @@ export const dictionaries = {
       bulkOpen: "Open selected",
       bulkCalculate: "Calculate selected",
       bulkMarkStatus: "Mark status",
+      quickOpen: "Open",
+      quickCalculate: "Calculate",
+      quickMarkStatus: "Mark status",
+      emptyStateGuidanceLabel: "Guidance:",
+      emptyStateGuidance: "Adjust saved filters, broaden owner/date range, or open Reports to review portfolio-level bottlenecks.",
     },
     statuses: {
       all: "All",
@@ -452,6 +457,11 @@ export const dictionaries = {
       bulkOpen: "باز کردن انتخاب شده",
       bulkCalculate: "محاسبه انتخاب شده",
       bulkMarkStatus: "ثبت وضعیت",
+      quickOpen: "باز کردن",
+      quickCalculate: "محاسبه",
+      quickMarkStatus: "ثبت وضعیت",
+      emptyStateGuidanceLabel: "راهنما:",
+      emptyStateGuidance: "فیلترها را تغییر دهید، بازه مسئول/تاریخ را گسترده تر کنید یا برای بررسی گلوگاه های پورتفولیو به گزارش ها بروید.",
     },
     statuses: {
       all: "همه",
