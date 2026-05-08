@@ -219,6 +219,14 @@ export const dictionaries = {
       onlyIssues: "Only issues",
       unresolved: "Unresolved",
     },
+    pageActions: {
+      materialPrices: { label: "Material Prices", aria: "Open material prices" },
+      calculate: { label: "Calculate", aria: "Run offer calculation" },
+      review: { label: "Review & Export", aria: "Open review and export" },
+      editScopes: { label: "Edit scopes and lines", aria: "Edit scopes and lines" },
+      editPrices: { label: "Edit prices", aria: "Edit material prices" },
+      backToOverview: { label: "Back to overview", aria: "Go back to offer overview" },
+    },
     review: {
       title: "Review & Export",
       stepDetail: "Final validation, readiness, and output actions",
@@ -536,6 +544,14 @@ export const dictionaries = {
       filterPlaceholder: "فیلتر متنی...",
       onlyIssues: "فقط موارد مشکل‌دار",
       unresolved: "حل‌نشده",
+    },
+    pageActions: {
+      materialPrices: { label: "قیمت متریال ها", aria: "باز کردن قیمت متریال ها" },
+      calculate: { label: "محاسبه", aria: "اجرای محاسبه پیشنهاد" },
+      review: { label: "بازبینی و خروجی", aria: "باز کردن بازبینی و خروجی" },
+      editScopes: { label: "ویرایش Scope ها و خطوط", aria: "ویرایش Scope ها و خطوط" },
+      editPrices: { label: "ویرایش قیمت ها", aria: "ویرایش قیمت متریال ها" },
+      backToOverview: { label: "بازگشت به نمای کلی", aria: "بازگشت به نمای کلی پیشنهاد" },
     },
     review: {
       title: "بازبینی و خروجی",

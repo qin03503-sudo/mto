@@ -4,6 +4,7 @@ import { Calculator, Layers3, PackageCheck, ShieldCheck } from "lucide-react";
 
 import { AppShell } from "@/components/app-shell";
 import { OfferFlowProgress } from "@/components/offer-flow-progress";
+import { PageActionBar } from "@/components/page-action-bar";
 import {
   CalculationStatusBadge,
   OfferStatusBadge,
@@ -80,6 +81,14 @@ export default async function OfferOverviewPage({
               <CardTitle>{dictionary.overview.actions}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <PageActionBar
+                primary={{ key: "material-prices", href: `/offers/${offer.id}/material-prices`, label: dictionary.pageActions.materialPrices.label, ariaLabel: dictionary.pageActions.materialPrices.aria }}
+                secondary={[
+                  { key: "scopes-lines", href: `/offers/${offer.id}/scopes-lines`, label: dictionary.pageActions.editScopes.label, ariaLabel: dictionary.pageActions.editScopes.aria },
+                  { key: "calculation", href: `/offers/${offer.id}/calculation`, label: dictionary.pageActions.calculate.label, ariaLabel: dictionary.pageActions.calculate.aria },
+                ]}
+                tertiary={[{ key: "review", href: `/offers/${offer.id}/review`, label: dictionary.pageActions.review.label, ariaLabel: dictionary.pageActions.review.aria }]}
+              />
               <WorkflowCard
                 href={`/offers/${offer.id}/material-prices`}
                 icon={<PackageCheck className="size-4" />}
