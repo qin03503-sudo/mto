@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 
 import { getOfferSummary, getOffers } from "@/lib/offers";
+import { validateCreateOffer } from "@/lib/offer-validation";
 import {
   buildCreatedOffer,
   type CreateOfferInput,
-  validateCreateOffer,
-} from "@/lib/offer-validation";
+} from "@/lib/offer-utils";
 import { initializeProjectMaterialPrices } from "@/lib/material-prices";
 import { addOffer } from "@/lib/offers";
 

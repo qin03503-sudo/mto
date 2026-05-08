@@ -2,11 +2,11 @@
 
 import { redirect } from "next/navigation";
 
+import { validateCreateOffer } from "@/lib/offer-validation";
 import {
   buildCreatedOffer,
   createOfferInputFromFormData,
-  validateCreateOffer,
-} from "@/lib/offer-validation";
+} from "@/lib/offer-utils";
 import { initializeProjectMaterialPrices } from "@/lib/material-prices";
 import { addOffer } from "@/lib/offers";
 
