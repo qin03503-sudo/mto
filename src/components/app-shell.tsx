@@ -10,8 +10,6 @@ import {
   Inbox,
   AlertOctagon,
   Send,
-  Blocks,
-  FileStack,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -46,15 +44,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: "/offers", label: dictionary.shell.offers, icon: LayoutDashboard },
     { href: "/offers/new", label: dictionary.shell.newOffer, icon: FilePlus2 },
-    { href: "/scopes", label: dictionary.shell.scopes, icon: Blocks },
-    { href: "/parts", label: dictionary.shell.parts, icon: FileStack },
+    { href: "/master-data", label: dictionary.shell.masterData, icon: Database },
     { href: "/dashboard", label: dictionary.shell.dashboard, icon: BarChart3 },
     { href: "/offers/inbox", label: dictionary.shell.managementInbox, icon: Inbox },
     { href: "/offers/stale", label: dictionary.shell.managementStale, icon: AlertOctagon },
     { href: "/offers/ready", label: dictionary.shell.managementReady, icon: Send },
     { href: "/reports", label: dictionary.shell.reports, icon: BarChart3 },
     { href: "/manual", label: dictionary.shell.manual, icon: BookOpenText },
-    { href: "/master-data", label: dictionary.shell.masterData, icon: Database },
   ];
 
   const normalizedPath = pathname.replace(`/${locale}`, "") || "/";

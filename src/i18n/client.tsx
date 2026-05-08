@@ -1,8 +1,6 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import { usePathname } from "next/navigation";
-
 import { defaultLocale, localizePath, type Locale } from "@/i18n/config";
 import { dictionaries, type Dictionary } from "@/i18n/dictionaries";
 
@@ -35,7 +33,6 @@ export function useI18n() {
 }
 
 export function useLocalizedPath() {
-  const pathname = usePathname();
   const { locale } = useI18n();
 
   return (href: string) => {

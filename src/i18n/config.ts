@@ -18,6 +18,11 @@ export function getDirection(locale: Locale) {
 }
 
 export function localizePath(pathname: string, locale: Locale) {
-  void locale;
-  return pathname;
+  if (locale === defaultLocale) {
+    return pathname;
+  }
+
+  const normalizedPathname = pathname.startsWith("/") ? pathname : `/${pathname}`;
+
+  return `/${locale}${normalizedPathname === "/" ? "" : normalizedPathname}`;
 }

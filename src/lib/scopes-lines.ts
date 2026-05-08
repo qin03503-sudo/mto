@@ -204,6 +204,122 @@ export async function addPartToLine(
   return { data: { id: linePart.id, partId: linePart.partId, qty: linePart.qty } };
 }
 
+export async function removeScopeFromOffer(offerId: string, offerScopeId: string) {
+  const offerScope = await prisma.offerScope.findFirst({
+    where: { id: offerScopeId, offerId },
+  });
+
+  if (!offerScope) {
+    return { error: "Offer scope not found." };
+  }
+
+  await prisma.offerScope.delete({ where: { id: offerScope.id } });
+  await syncOfferScopeLineCounts(offerId);
+
+  return { data: { id: offerScope.id } };
+}
+
+export async function updateOfferLine(
+  offerId: string,
+  offerScopeId: string,
+  lineId: string,
+  lineName: string
+) {
+  const line = await prisma.offerLine.findFirst({
+    where: { id: lineId, offerScope: { id: offerScopeId, offerId } },
+  });
+  const normalizedLineName = lineName.trim();
+
+  if (!line) {
+    return { error: "Line not found." };
+  }
+
+  if (!normalizedLineName) {
+    return { error: "Line name is required." };
+  }
+
+  const updated = await prisma.offerLine.update({
+    where: { id: line.id },
+    data: { name: normalizedLineName },
+  });
+  await syncOfferScopeLineCounts(offerId);
+
+  return { data: { id: updated.id, name: updated.name } };
+}
+
+export async function removeLineFromOfferScope(
+  offerId: string,
+  offerScopeId: string,
+  lineId: string
+) {
+  const line = await prisma.offerLine.findFirst({
+    where: { id: lineId, offerScope: { id: offerScopeId, offerId } },
+  });
+
+  if (!line) {
+    return { error: "Line not found." };
+  }
+
+  await prisma.offerLine.delete({ where: { id: line.id } });
+  await syncOfferScopeLineCounts(offerId);
+
+  return { data: { id: line.id } };
+}
+
+export async function updateLinePartQuantity(
+  offerId: string,
+  offerScopeId: string,
+  lineId: string,
+  linePartId: string,
+  qty: number
+) {
+  const linePart = await prisma.offerLinePart.findFirst({
+    where: {
+      id: linePartId,
+      line: { id: lineId, offerScope: { id: offerScopeId, offerId } },
+    },
+  });
+
+  if (!linePart) {
+    return { error: "Line part not found." };
+  }
+
+  if (!Number.isFinite(qty) || qty <= 0) {
+    return { error: "Quantity must be greater than zero." };
+  }
+
+  const updated = await prisma.offerLinePart.update({
+    where: { id: linePart.id },
+    data: { qty },
+  });
+  await syncOfferScopeLineCounts(offerId);
+
+  return { data: { id: updated.id, qty: updated.qty } };
+}
+
+export async function removePartFromLine(
+  offerId: string,
+  offerScopeId: string,
+  lineId: string,
+  linePartId: string
+) {
+  const linePart = await prisma.offerLinePart.findFirst({
+    where: {
+      id: linePartId,
+      line: { id: lineId, offerScope: { id: offerScopeId, offerId } },
+    },
+  });
+
+  if (!linePart) {
+    return { error: "Line part not found." };
+  }
+
+  await prisma.offerLinePart.delete({ where: { id: linePart.id } });
+  await syncOfferScopeLineCounts(offerId);
+
+  return { data: { id: linePart.id } };
+}
+
 export async function getScopeById(scopeId: string) {
   return prisma.scope.findUnique({ where: { id: scopeId } });
 }
