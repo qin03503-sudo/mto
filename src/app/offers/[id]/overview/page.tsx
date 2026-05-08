@@ -17,12 +17,7 @@ import {
 import { getOfferById } from "@/lib/offers";
 import { getMaterialPriceSummary } from "@/lib/material-prices";
 import { getScopeLineSummary } from "@/lib/scopes-lines";
-
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
+import { getDictionary, getLocale } from "@/i18n/server";
 
 export default async function OfferOverviewPage({
   params,
@@ -30,6 +25,13 @@ export default async function OfferOverviewPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const locale = await getLocale();
+  const dictionary = await getDictionary();
+  const currencyFormatter = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
   const offer = await getOfferById(id);
 
   if (!offer) {
@@ -49,18 +51,18 @@ export default async function OfferOverviewPage({
             <CardDescription>{offer.description}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
-            <Info label="Type" value={offer.type} />
-            <Info label="Owner" value={offer.owner} />
-            <Info label="Input date" value={offer.inputDate} />
-            <Info label="Close date" value={offer.closeDate} />
-            <Info label="Total" value={currencyFormatter.format(offer.total)} />
-            <Info label="Configured scope/line" value={`${scopeSummary.scopes} scopes / ${scopeSummary.lines} lines`} />
+            <Info label={dictionary.common.type} value={offer.type === "custom" ? dictionary.offers.custom : dictionary.offers.standard} />
+            <Info label={dictionary.common.owner} value={offer.owner} />
+            <Info label={dictionary.common.inputDate} value={offer.inputDate} />
+            <Info label={dictionary.common.closeDate} value={offer.closeDate} />
+            <Info label={dictionary.common.total} value={currencyFormatter.format(offer.total)} />
+            <Info label={dictionary.overview.configuredScopeLine} value={`${scopeSummary.scopes} ${dictionary.offers.scopesCount} / ${scopeSummary.lines} ${dictionary.offers.linesCount}`} />
             <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Offer status</div>
+              <div className="text-sm text-muted-foreground">{dictionary.overview.offerStatus}</div>
               <OfferStatusBadge status={offer.status} />
             </div>
             <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Calculation status</div>
+              <div className="text-sm text-muted-foreground">{dictionary.overview.calculationStatus}</div>
               <CalculationStatusBadge status={offer.calculationStatus} />
             </div>
           </CardContent>
@@ -68,26 +70,26 @@ export default async function OfferOverviewPage({
 
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Actions</CardTitle>
+            <CardTitle>{dictionary.overview.actions}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <WorkflowCard
               href={`/offers/${offer.id}/material-prices`}
               icon={<PackageCheck className="size-4" />}
-              label="Material Prices"
-              detail={`${materialSummary.unresolved} unresolved / ${materialSummary.overridden} overrides`}
+              label={dictionary.overview.materialPrices}
+              detail={dictionary.overview.materialPricesDetail.replace("{unresolved}", materialSummary.unresolved.toString()).replace("{overridden}", materialSummary.overridden.toString())}
             />
             <WorkflowCard
               href={`/offers/${offer.id}/scopes-lines`}
               icon={<Layers3 className="size-4" />}
-              label="Scopes And Lines"
-              detail={`${scopeSummary.parts} line parts configured`}
+              label={dictionary.overview.scopesAndLines}
+              detail={dictionary.overview.scopesAndLinesDetail.replace("{parts}", scopeSummary.parts.toString())}
             />
             <WorkflowCard
               href={`/offers/${offer.id}/calculation`}
               icon={<Calculator className="size-4" />}
-              label="Calculation"
-              detail={`${offer.calculationStatus.replace("_", " ")} status`}
+              label={dictionary.offers.calculation}
+              detail={dictionary.overview.calculationDetail.replace("{status}", dictionary.statuses[offer.calculationStatus])}
             />
           </CardContent>
         </Card>

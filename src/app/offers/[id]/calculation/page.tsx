@@ -24,16 +24,7 @@ import {
 } from "@/components/ui/table";
 import { getCalculationResults } from "@/lib/calculation";
 import { getOfferById } from "@/lib/offers";
-
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
-
-const numberFormatter = new Intl.NumberFormat("en-US", {
-  maximumFractionDigits: 4,
-});
+import { getDictionary, getLocale } from "@/i18n/server";
 
 export default async function CalculationPage({
   params,
@@ -41,6 +32,16 @@ export default async function CalculationPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const locale = await getLocale();
+  const dictionary = await getDictionary();
+  const currencyFormatter = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
+  const numberFormatter = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US", {
+    maximumFractionDigits: 4,
+  });
   const offer = await getOfferById(id);
 
   if (!offer) {
@@ -57,19 +58,19 @@ export default async function CalculationPage({
           <Card>
             <CardHeader className="gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <CardTitle>{offer.name} / Calculation</CardTitle>
+                <CardTitle>{offer.name} / {dictionary.calculation.title}</CardTitle>
               </div>
               <CalculationStatusBadge status={offer.calculationStatus} />
             </CardHeader>
             <CardContent className="space-y-4">
               {calculation.status === "outdated" ? (
                 <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
-                  Previous results are visible but stale because pricing, scope, line, part, quantity, or MTO version inputs changed.
+                  {dictionary.calculation.staleWarning}
                 </div>
               ) : null}
               {calculation.issues.length > 0 ? (
                 <div className="space-y-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/30 dark:text-red-200">
-                  <div className="font-medium">Calculation is blocked</div>
+                  <div className="font-medium">{dictionary.calculation.blocked}</div>
                   {calculation.issues.map((issue) => (
                     <div key={`${issue.code}-${issue.message}`}>{issue.message}</div>
                   ))}
@@ -77,13 +78,13 @@ export default async function CalculationPage({
               ) : null}
               <div className="flex flex-wrap gap-2">
                 <form action={calculateOfferAction.bind(null, id)}>
-                  <Button disabled={!canCalculate}>Calculate</Button>
+                  <Button disabled={!canCalculate}>{dictionary.common.calculate}</Button>
                 </form>
                 <Button nativeButton={false} variant="outline" render={<Link href={`/offers/${id}/scopes-lines`} />}>
-                  Edit scopes and lines
+                  {dictionary.calculation.editScopesAndLines}
                 </Button>
                 <Button nativeButton={false} variant="outline" render={<Link href={`/offers/${id}/material-prices`} />}>
-                  Edit prices
+                  {dictionary.calculation.editPrices}
                 </Button>
               </div>
             </CardContent>
@@ -95,7 +96,7 @@ export default async function CalculationPage({
                 <div>
                   <CardTitle>{scope.scopeName}</CardTitle>
                   <CardDescription>
-                    {scope.lines.length} lines configured
+                    {scope.lines.length} {dictionary.calculation.linesConfigured}
                   </CardDescription>
                 </div>
                 <div className="text-xl font-semibold">
@@ -109,7 +110,7 @@ export default async function CalculationPage({
                       <div>
                         <div className="font-medium">{line.lineName}</div>
                         <div className="text-xs text-muted-foreground">
-                          {line.parts.length} parts
+                          {line.parts.length} {dictionary.calculation.partsCount}
                         </div>
                       </div>
                       <div className="font-medium">
@@ -119,12 +120,12 @@ export default async function CalculationPage({
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Part</TableHead>
-                          <TableHead className="text-right">Qty</TableHead>
+                          <TableHead>{dictionary.common.part}</TableHead>
+                          <TableHead className="text-right">{dictionary.calculation.qty}</TableHead>
                           <TableHead className="hidden md:table-cell text-right">
-                            Unit price
+                            {dictionary.common.unitPrice}
                           </TableHead>
-                          <TableHead className="text-right">Total</TableHead>
+                          <TableHead className="text-right">{dictionary.common.total}</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -147,7 +148,7 @@ export default async function CalculationPage({
                                 <TableCell colSpan={4} className="bg-muted/30 p-0">
                                   <div className="space-y-2 p-4">
                                     <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                                      MTO row drill-down
+                                      {dictionary.calculation.mtoDrillDown}
                                     </div>
                                     <div className="grid gap-2">
                                       {part.details.map((detail) => (
@@ -160,11 +161,11 @@ export default async function CalculationPage({
                                               {detail.materialName}
                                             </div>
                                             <div className="text-muted-foreground">
-                                              {detail.dimension || "No dimension"} / {detail.unit || "No unit"}
+                                              {detail.dimension || dictionary.calculation.noDimension} / {detail.unit || dictionary.calculation.noUnit}
                                             </div>
                                           </div>
                                           <div className="md:text-right">
-                                            Value {numberFormatter.format(detail.value)}
+                                             {dictionary.common.value} {numberFormatter.format(detail.value)}
                                           </div>
                                           <div className="md:text-right">
                                             {currencyFormatter.format(detail.unitPrice)}
@@ -192,15 +193,15 @@ export default async function CalculationPage({
 
         <Card className="h-fit">
           <CardHeader>
-            <CardTitle>Run</CardTitle>
+            <CardTitle>{dictionary.calculation.run}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <SummaryRow label="Run ID" value={calculation.id} />
-            <SummaryRow label="MTO version" value={calculation.mtoVersionId} />
-            <SummaryRow label="Run time" value={calculation.runAt} />
-            <SummaryRow label="Offer total" value={currencyFormatter.format(calculation.total)} />
+            <SummaryRow label={dictionary.calculation.runId} value={calculation.id} />
+            <SummaryRow label={dictionary.calculation.mtoVersion} value={calculation.mtoVersionId} />
+            <SummaryRow label={dictionary.calculation.runTime} value={calculation.runAt} />
+            <SummaryRow label={dictionary.calculation.offerTotal} value={currencyFormatter.format(calculation.total)} />
             <div className="flex items-center justify-between rounded-xl border bg-muted/40 p-4">
-              <span className="text-sm text-muted-foreground">Run status</span>
+              <span className="text-sm text-muted-foreground">{dictionary.calculation.runStatus}</span>
               <Badge
                 className={
                   calculation.status === "failed"
@@ -210,7 +211,7 @@ export default async function CalculationPage({
                       : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
                 }
               >
-                {calculation.status}
+                {dictionary.statuses[calculation.status]}
               </Badge>
             </div>
           </CardContent>

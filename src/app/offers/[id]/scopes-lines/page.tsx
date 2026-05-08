@@ -42,12 +42,7 @@ import {
   getScopeLineSummary,
   getScopes,
 } from "@/lib/scopes-lines";
-
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
+import { getDictionary, getLocale } from "@/i18n/server";
 
 export default async function ScopesLinesPage({
   params,
@@ -58,6 +53,13 @@ export default async function ScopesLinesPage({
 }) {
   const { id } = await params;
   const { error } = await searchParams;
+  const locale = await getLocale();
+  const dictionary = await getDictionary();
+  const currencyFormatter = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
   const offer = await getOfferById(id);
 
   if (!offer) {
@@ -102,7 +104,7 @@ export default async function ScopesLinesPage({
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>{offer.name} / Scopes and Lines</CardTitle>
+              <CardTitle>{offer.name} / {dictionary.scopesLines.title}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {error ? (
@@ -127,10 +129,10 @@ export default async function ScopesLinesPage({
                   className="flex flex-col gap-2 sm:flex-row sm:items-end"
                 >
                   <div className="grid gap-2">
-                    <Label htmlFor="scope_id">Add scope</Label>
+                    <Label htmlFor="scope_id">{dictionary.scopesLines.addScope}</Label>
                     <Select name="scope_id" disabled={availableScopes.length === 0}>
                       <SelectTrigger id="scope_id" className="w-full sm:w-[220px]">
-                        <SelectValue placeholder="Select scope" />
+                        <SelectValue placeholder={dictionary.scopesLines.selectScope} />
                       </SelectTrigger>
                       <SelectContent>
                         {availableScopes.map((scope) => (
@@ -142,11 +144,11 @@ export default async function ScopesLinesPage({
                     </Select>
                   </div>
                   <Button size="sm" disabled={availableScopes.length === 0}>
-                    Add Scope
+                    {dictionary.scopesLines.addScopeButton}
                   </Button>
                 </form>
                 <Button nativeButton={false} size="sm" variant="outline" render={<Link href={`/offers/${id}/overview`} />}>
-                  Back to overview
+                  {dictionary.common.backToOverview}
                 </Button>
               </div>
             </CardContent>
@@ -155,9 +157,9 @@ export default async function ScopesLinesPage({
           {offerScopes.length === 0 ? (
             <Card>
               <CardHeader>
-                <CardTitle>No scopes selected</CardTitle>
+                <CardTitle>{dictionary.scopesLines.noScopesSelected}</CardTitle>
                 <CardDescription>
-                  Calculation is blocked until at least one scope is selected.
+                  {dictionary.scopesLines.calculationBlockedNoScopes}
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -170,9 +172,9 @@ export default async function ScopesLinesPage({
                 <Card key={offerScope.id}>
                   <CardHeader className="gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <CardTitle>{scope?.name ?? "Unknown scope"}</CardTitle>
+                      <CardTitle>{scope?.name ?? dictionary.scopesLines.unknownScope}</CardTitle>
                       <CardDescription>
-                        {scope?.description ?? "Scope master data is missing."}
+                        {scope?.description ?? dictionary.scopesLines.missingScopeData}
                       </CardDescription>
                     </div>
                     <form
@@ -181,23 +183,23 @@ export default async function ScopesLinesPage({
                     >
                       <input type="hidden" name="offer_scope_id" value={offerScope.id} />
                       <div className="grid gap-2">
-                        <Label htmlFor={`line_name_${offerScope.id}`}>Line name</Label>
+                        <Label htmlFor={`line_name_${offerScope.id}`}>{dictionary.scopesLines.lineName}</Label>
                         <Input
                           id={`line_name_${offerScope.id}`}
                           name="line_name"
-                          placeholder="Line 1"
+                          placeholder={dictionary.scopesLines.linePlaceholder}
                           required
                         />
                       </div>
                       <Button size="sm" variant="outline">
-                        Add Line
+                        {dictionary.scopesLines.addLine}
                       </Button>
                     </form>
                   </CardHeader>
                   <CardContent className="space-y-5">
                     {offerScope.lines.length === 0 ? (
                       <div className="rounded-xl border bg-muted/50 p-4 text-sm text-muted-foreground">
-                        This scope has no lines. Add at least one line before calculation.
+                        {dictionary.scopesLines.noLines}
                       </div>
                     ) : (
                       offerScope.lines.map((line) => (
@@ -206,7 +208,7 @@ export default async function ScopesLinesPage({
                             <div>
                               <div className="font-medium">{line.name}</div>
                               <div className="text-xs text-muted-foreground">
-                                {line.parts.length} parts configured
+                                {line.parts.length} {dictionary.scopesLines.partsConfigured}
                               </div>
                             </div>
                             <form
@@ -216,10 +218,10 @@ export default async function ScopesLinesPage({
                               <input type="hidden" name="offer_scope_id" value={offerScope.id} />
                               <input type="hidden" name="line_id" value={line.id} />
                               <div className="grid gap-2">
-                                <Label htmlFor={`part_id_${line.id}`}>Part</Label>
+                                <Label htmlFor={`part_id_${line.id}`}>{dictionary.common.part}</Label>
                                 <Select name="part_id" disabled={validParts.length === 0}>
                                   <SelectTrigger id={`part_id_${line.id}`}>
-                                    <SelectValue placeholder="Select part" />
+                                    <SelectValue placeholder={dictionary.scopesLines.selectPart} />
                                   </SelectTrigger>
                                   <SelectContent>
                                     {validParts.map((part) => (
@@ -231,7 +233,7 @@ export default async function ScopesLinesPage({
                                 </Select>
                               </div>
                               <div className="grid gap-2">
-                                <Label htmlFor={`qty_${line.id}`}>Qty</Label>
+                                <Label htmlFor={`qty_${line.id}`}>{dictionary.calculation.qty}</Label>
                                 <Input
                                   id={`qty_${line.id}`}
                                   name="qty"
@@ -242,19 +244,19 @@ export default async function ScopesLinesPage({
                                 />
                               </div>
                               <Button size="sm" variant="outline">
-                                Add Part
+                                {dictionary.scopesLines.addPart}
                               </Button>
                             </form>
                           </div>
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead>Part</TableHead>
-                                <TableHead className="text-right">Qty</TableHead>
+                                <TableHead>{dictionary.common.part}</TableHead>
+                                <TableHead className="text-right">{dictionary.calculation.qty}</TableHead>
                                 <TableHead className="hidden md:table-cell text-right">
-                                  Unit price
+                                  {dictionary.common.unitPrice}
                                 </TableHead>
-                                <TableHead className="text-right">Line total</TableHead>
+                                <TableHead className="text-right">{dictionary.scopesLines.lineTotal}</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -268,17 +270,17 @@ export default async function ScopesLinesPage({
                                   <TableRow key={linePart.id}>
                                     <TableCell>
                                       <div className="font-medium">
-                                        {part?.name ?? "Unknown part"}
+                                          {part?.name ?? dictionary.scopesLines.unknownPart}
                                       </div>
                                       <div className="text-xs text-muted-foreground">
-                                        {isValidForScope ? "Valid for scope" : "Invalid scope/part combination"}
+                                        {isValidForScope ? dictionary.scopesLines.validForScope : dictionary.scopesLines.invalidScopePart}
                                       </div>
                                     </TableCell>
                                     <TableCell className="text-right">
                                       {linePart.qty > 0 ? (
                                         linePart.qty
                                       ) : (
-                                        <Badge variant="destructive">Invalid</Badge>
+                                          <Badge variant="destructive">{dictionary.common.invalid}</Badge>
                                       )}
                                     </TableCell>
                                     <TableCell className="hidden md:table-cell text-right">
@@ -296,13 +298,13 @@ export default async function ScopesLinesPage({
                       ))
                     )}
                     <div className="rounded-xl border bg-muted/50 p-4">
-                      <div className="mb-3 text-sm font-medium">Parts available for {scope?.name}</div>
+                      <div className="mb-3 text-sm font-medium">{dictionary.scopesLines.partsAvailableFor.replace("{scope}", scope?.name ?? "")}</div>
                       <div className="grid gap-2 sm:grid-cols-2">
                         {validParts.map((part) => (
                           <div key={part.id} className="rounded-lg border bg-background p-3 text-sm">
                             <div className="font-medium">{part.name}</div>
                             <div className="text-muted-foreground">
-                              {currencyFormatter.format(unitPrices.get(`${offerScope.scopeId}:${part.id}`) ?? 0)} unit price
+                              {currencyFormatter.format(unitPrices.get(`${offerScope.scopeId}:${part.id}`) ?? 0)} {dictionary.common.unitPrice}
                             </div>
                           </div>
                         ))}
@@ -317,15 +319,15 @@ export default async function ScopesLinesPage({
 
         <Card className="h-fit">
           <CardHeader>
-            <CardTitle>Summary</CardTitle>
+            <CardTitle>{dictionary.common.summary}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <SummaryRow label="Selected scopes" value={summary.scopes.toString()} />
-            <SummaryRow label="Lines" value={summary.lines.toString()} />
-            <SummaryRow label="Line parts" value={summary.parts.toString()} />
-            <SummaryRow label="Invalid quantities" value={summary.invalidQuantities.toString()} />
+            <SummaryRow label={dictionary.common.selectedScopes} value={summary.scopes.toString()} />
+            <SummaryRow label={dictionary.offers.linesCount} value={summary.lines.toString()} />
+            <SummaryRow label={dictionary.scopesLines.lineParts} value={summary.parts.toString()} />
+            <SummaryRow label={dictionary.scopesLines.invalidQuantities} value={summary.invalidQuantities.toString()} />
             <div className="space-y-2 rounded-xl border bg-muted/50 p-4">
-              <div className="text-sm text-muted-foreground">Calculation status</div>
+              <div className="text-sm text-muted-foreground">{dictionary.overview.calculationStatus}</div>
               <CalculationStatusBadge status={offer.calculationStatus} />
             </div>
           </CardContent>

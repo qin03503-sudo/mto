@@ -1,21 +1,8 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
+import { useI18n } from "@/i18n/client";
 import type { CalculationStatus, OfferStatus } from "@/lib/offers";
-
-const offerStatusLabels: Record<OfferStatus, string> = {
-  draft: "Draft",
-  pricing: "Pricing",
-  ready: "Ready",
-  sent: "Sent",
-  closed: "Closed",
-  cancelled: "Cancelled",
-};
-
-const calculationStatusLabels: Record<CalculationStatus, string> = {
-  not_calculated: "Not calculated",
-  current: "Current",
-  outdated: "Outdated",
-  failed: "Failed",
-};
 
 const statusClasses: Record<OfferStatus | CalculationStatus, string> = {
   draft: "bg-muted text-muted-foreground",
@@ -31,7 +18,9 @@ const statusClasses: Record<OfferStatus | CalculationStatus, string> = {
 };
 
 export function OfferStatusBadge({ status }: { status: OfferStatus }) {
-  return <Badge className={statusClasses[status]}>{offerStatusLabels[status]}</Badge>;
+  const { dictionary } = useI18n();
+
+  return <Badge className={statusClasses[status]}>{dictionary.statuses[status]}</Badge>;
 }
 
 export function CalculationStatusBadge({
@@ -39,9 +28,11 @@ export function CalculationStatusBadge({
 }: {
   status: CalculationStatus;
 }) {
+  const { dictionary } = useI18n();
+
   return (
     <Badge className={statusClasses[status]}>
-      {calculationStatusLabels[status]}
+      {dictionary.statuses[status]}
     </Badge>
   );
 }

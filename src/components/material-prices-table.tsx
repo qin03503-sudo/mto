@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useI18n } from "@/i18n/client";
 import {
   Table,
   TableBody,
@@ -16,10 +17,6 @@ import {
 } from "@/components/ui/table";
 import type { MaterialPrice } from "@/lib/material-prices";
 
-const numberFormatter = new Intl.NumberFormat("en-US", {
-  maximumFractionDigits: 2,
-});
-
 export function MaterialPricesTable({
   offerId,
   prices,
@@ -27,6 +24,10 @@ export function MaterialPricesTable({
   offerId: string;
   prices: MaterialPrice[];
 }) {
+  const { dictionary, locale } = useI18n();
+  const numberFormatter = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US", {
+    maximumFractionDigits: 2,
+  });
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [changedOnly, setChangedOnly] = useState(false);
@@ -61,7 +62,7 @@ export function MaterialPricesTable({
     setError(null);
 
     if (!Number.isFinite(unitPrice) || unitPrice < 0) {
-      setError("Project price must be a non-negative number.");
+      setError(dictionary.materialPrices.projectPriceInvalid);
       return;
     }
 
@@ -82,7 +83,7 @@ export function MaterialPricesTable({
     };
 
     if (!response.ok || !payload.data) {
-      setError(payload.error ?? "Could not save material price.");
+      setError(payload.error ?? dictionary.materialPrices.couldNotSave);
       setSavingMaterialId(null);
       return;
     }
@@ -107,14 +108,14 @@ export function MaterialPricesTable({
         <Input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search material, dimension, or unit..."
+          placeholder={dictionary.materialPrices.searchPlaceholder}
         />
         <Button
           type="button"
           variant={changedOnly ? "default" : "outline"}
           onClick={() => setChangedOnly((current) => !current)}
         >
-          Show changed only
+          {dictionary.materialPrices.showChangedOnly}
         </Button>
       </div>
 
@@ -122,19 +123,19 @@ export function MaterialPricesTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Material</TableHead>
-              <TableHead className="hidden md:table-cell">Dimension</TableHead>
-              <TableHead>Unit</TableHead>
-              <TableHead className="text-right">Default Price</TableHead>
-              <TableHead className="text-right">Project Price</TableHead>
-              <TableHead>Changed</TableHead>
+              <TableHead>{dictionary.common.material}</TableHead>
+              <TableHead className="hidden md:table-cell">{dictionary.common.dimension}</TableHead>
+              <TableHead>{dictionary.common.unit}</TableHead>
+              <TableHead className="text-right">{dictionary.common.defaultPrice}</TableHead>
+              <TableHead className="text-right">{dictionary.common.projectPrice}</TableHead>
+              <TableHead>{dictionary.common.changed}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredPrices.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
-                  No material prices match the current filters.
+                  {dictionary.materialPrices.noMatches}
                 </TableCell>
               </TableRow>
             ) : (
@@ -156,10 +157,10 @@ export function MaterialPricesTable({
                   <TableCell className="min-w-[180px] text-right">
                     <div className="flex items-center justify-end gap-2">
                       {price.projectPrice === null ? (
-                        <Badge variant="destructive">Unresolved</Badge>
+                        <Badge variant="destructive">{dictionary.common.unresolved}</Badge>
                       ) : null}
                       <Input
-                        aria-label={`${price.material} project price`}
+                        aria-label={dictionary.materialPrices.ariaProjectPrice.replace("{material}", price.material)}
                         className="h-8 w-28 text-right"
                         min="0"
                         step="0.01"
@@ -178,17 +179,17 @@ export function MaterialPricesTable({
                         disabled={savingMaterialId === price.materialId}
                         onClick={() => saveProjectPrice(price.materialId)}
                       >
-                        {savingMaterialId === price.materialId ? "Saving" : "Save"}
+                        {savingMaterialId === price.materialId ? dictionary.common.saving : dictionary.common.save}
                       </Button>
                     </div>
                   </TableCell>
                   <TableCell>
                     {price.isOverridden ? (
                       <Badge className="bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
-                        Yes
+                        {dictionary.common.yes}
                       </Badge>
                     ) : (
-                      <Badge variant="outline">No</Badge>
+                      <Badge variant="outline">{dictionary.common.no}</Badge>
                     )}
                   </TableCell>
                 </TableRow>

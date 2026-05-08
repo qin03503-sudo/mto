@@ -22,8 +22,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useI18n } from "@/i18n/client";
 
 export default function ScopesPage() {
+  const { dictionary } = useI18n();
   const [scopesData, setScopesData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +44,7 @@ export default function ScopesPage() {
     return (
       <AppShell>
         <div className="flex items-center justify-center py-20">
-          <div className="text-muted-foreground">Loading...</div>
+          <div className="text-muted-foreground">{dictionary.common.loading}</div>
         </div>
       </AppShell>
     );
@@ -54,23 +56,23 @@ export default function ScopesPage() {
         <Card className="shadow-sm">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Scopes Master</CardTitle>
+              <CardTitle>{dictionary.masterData.scopesMaster}</CardTitle>
               <div className="flex items-center gap-2">
                 <Input
-                  placeholder="Search scopes..."
+                  placeholder={dictionary.masterData.searchScopes}
                   className="h-10 w-48"
                   // In a real implementation, you would add search/filter logic here
                 />
                 <Button
                   variant="outline"
                   size="icon"
-                  aria-label="Refresh"
+                  aria-label={dictionary.common.refresh}
                   onClick={() => window.location.reload()}
                 >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
                 <Link href="/scopes/new">
-                  <Button variant="default" size="icon" aria-label="Add new scope">
+                  <Button variant="default" size="icon" aria-label={`${dictionary.common.addNew} ${dictionary.common.scope}`}>
                     <Plus className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -81,15 +83,15 @@ export default function ScopesPage() {
             <div className="overflow-hidden rounded-2xl border">
               {scopesData.length === 0 ? (
                 <div className="py-10 text-center text-muted-foreground">
-                  No scopes found. Click the + button to add one.
+                  {dictionary.masterData.noScopes}
                 </div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Scope Name</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead className="w-20">Actions</TableHead>
+                      <TableHead>{dictionary.masterData.scopeName}</TableHead>
+                      <TableHead>{dictionary.common.description}</TableHead>
+                      <TableHead className="w-20">{dictionary.common.actions}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -106,7 +108,7 @@ export default function ScopesPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              aria-label="Edit scope"
+                              aria-label={`${dictionary.common.edit} ${dictionary.common.scope}`}
                             >
                               <Edit className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
                             </Button>
@@ -114,9 +116,9 @@ export default function ScopesPage() {
                           <Button
                             variant="destructive"
                             size="icon"
-                            aria-label="Delete scope"
+                            aria-label={`${dictionary.common.delete} ${dictionary.common.scope}`}
                             onClick={async () => {
-                              if (window.confirm("Are you sure you want to delete this scope?")) {
+                              if (window.confirm(dictionary.masterData.deleteScopeConfirm)) {
                                 try {
                                   const deleteRes = await fetch(`/api/v1/scopes?id=${scope.id}`, {
                                     method: "DELETE",
@@ -127,7 +129,7 @@ export default function ScopesPage() {
                                   // Refetch the data
                                   window.location.reload();
                                 } catch (error) {
-                                  alert("Failed to delete scope");
+                                  alert(dictionary.masterData.failedDeleteScope);
                                 }
                               }
                             }}

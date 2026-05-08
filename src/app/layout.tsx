@@ -1,19 +1,33 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { I18nProvider } from "@/i18n/client";
+import { getDirection } from "@/i18n/config";
+import { getDictionary, getLocale } from "@/i18n/server";
 
-export const metadata: Metadata = {
-  title: "Busduct MTO Pricing",
-  description: "Proposal pricing workflow for busduct MTO projects",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const dictionary = await getDictionary();
 
-export default function RootLayout({
+  return {
+    title: dictionary.metadata.title,
+    description: dictionary.metadata.description,
+  };
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const dictionary = await getDictionary();
+
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang={locale} dir={getDirection(locale)} className="h-full antialiased">
+      <body className="min-h-full flex flex-col">
+        <I18nProvider locale={locale} dictionary={dictionary}>
+          {children}
+        </I18nProvider>
+      </body>
     </html>
   );
 }

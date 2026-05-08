@@ -24,8 +24,10 @@ import {
 import {
   Label,
 } from "@/components/ui/label";
+import { useI18n } from "@/i18n/client";
 
 export default function NewMtoRowPage() {
+  const { dictionary } = useI18n();
   const [scopes, setScopes] = useState<Array<{id: string; name: string}>>([]);
   const [parts, setParts] = useState<Array<{id: string; name: string; scopeId: string}>>([]);
   const [materials, setMaterials] = useState<Array<{id: string; name: string}>>([]);
@@ -85,13 +87,13 @@ export default function NewMtoRowPage() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to create MTO row");
+        throw new Error(errorData.error || dictionary.mtoRowForm.createFailed);
       }
 
       // Redirect to the list page
       window.location.href = "/mto-rows";
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred");
+      setError(err instanceof Error ? err.message : dictionary.mtoRowForm.unknownError);
     } finally {
       setIsSubmitting(false);
     }
@@ -103,9 +105,9 @@ export default function NewMtoRowPage() {
         <Card className="shadow-sm">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>New MTO Row</CardTitle>
+              <CardTitle>{dictionary.mtoRowForm.title}</CardTitle>
               <Link href="/mto-rows">
-                <Button variant="outline" size="icon" aria-label="Go back to list">
+                <Button variant="outline" size="icon" aria-label={dictionary.mtoRowForm.backToList}>
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
               </Link>
@@ -114,14 +116,14 @@ export default function NewMtoRowPage() {
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid gap-2">
-                <Label htmlFor="scope_id">Scope</Label>
+                <Label htmlFor="scope_id">{dictionary.common.scope}</Label>
                 <Select
                   value={scopeId}
                   onValueChange={(value) => setScopeId(value ?? "")}
                   disabled={isSubmitting}
                 >
                   <SelectTrigger id="scope_id">
-                    <SelectValue placeholder="Select scope" />
+                    <SelectValue placeholder={dictionary.mtoRowForm.selectScope} />
                   </SelectTrigger>
                   <SelectContent>
                     {scopes.map(scope => (
@@ -134,14 +136,14 @@ export default function NewMtoRowPage() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="part_id">Part</Label>
+                <Label htmlFor="part_id">{dictionary.common.part}</Label>
                 <Select
                   value={partId}
                   onValueChange={(value) => setPartId(value ?? "")}
                   disabled={isSubmitting || !scopeId || filteredParts.length === 0}
                 >
                   <SelectTrigger id="part_id">
-                    <SelectValue placeholder="Select part" />
+                    <SelectValue placeholder={dictionary.mtoRowForm.selectPart} />
                   </SelectTrigger>
                   <SelectContent>
                     {filteredParts.map(part => (
@@ -154,14 +156,14 @@ export default function NewMtoRowPage() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="material_id">Material</Label>
+                <Label htmlFor="material_id">{dictionary.common.material}</Label>
                 <Select
                   value={materialId}
                   onValueChange={(value) => setMaterialId(value ?? "")}
                   disabled={isSubmitting}
                 >
                   <SelectTrigger id="material_id">
-                    <SelectValue placeholder="Select material" />
+                    <SelectValue placeholder={dictionary.mtoRowForm.selectMaterial} />
                   </SelectTrigger>
                   <SelectContent>
                     {materials.map(material => (
@@ -174,19 +176,19 @@ export default function NewMtoRowPage() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{dictionary.common.description}</Label>
                 <Textarea
                   id="description"
                   value={description}
                   onChange={e => setDescription(e.target.value)}
-                  placeholder="Optional description"
+                  placeholder={dictionary.mtoRowForm.optionalDescription}
                   disabled={isSubmitting}
                 />
               </div>
 
               <div className="grid gap-2 sm:grid-cols-2">
                 <div>
-                  <Label htmlFor="quantity">Quantity</Label>
+                  <Label htmlFor="quantity">{dictionary.common.quantity}</Label>
                   <Input
                     id="quantity"
                     type="number"
@@ -199,7 +201,7 @@ export default function NewMtoRowPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="value">Value</Label>
+                  <Label htmlFor="value">{dictionary.common.value}</Label>
                   <Input
                     id="value"
                     type="number"
@@ -214,12 +216,12 @@ export default function NewMtoRowPage() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="unit">Unit</Label>
+                <Label htmlFor="unit">{dictionary.common.unit}</Label>
                 <Input
                   id="unit"
                   value={unit}
                   onChange={e => setUnit(e.target.value)}
-                  placeholder="e.g., Kg, PCS, m2"
+                  placeholder={dictionary.mtoRowForm.unitPlaceholder}
                   disabled={isSubmitting}
                 />
               </div>
@@ -232,10 +234,10 @@ export default function NewMtoRowPage() {
 
               <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
                 <Button type="button" variant="outline" onClick={() => window.location.href = "/mto-rows"}>
-                  Cancel
+                  {dictionary.common.cancel}
                 </Button>
                 <Button type="submit" variant="default" disabled={isSubmitting}>
-                  {isSubmitting ? "Creating..." : "Create MTO Row"}
+                  {isSubmitting ? dictionary.mtoRowForm.creating : dictionary.mtoRowForm.create}
                 </Button>
               </div>
             </form>

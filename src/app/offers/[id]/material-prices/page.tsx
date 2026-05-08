@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { getMaterialPricesForOffer, getMaterialPriceSummary } from "@/lib/material-prices";
 import { getOfferById } from "@/lib/offers";
+import { getDictionary } from "@/i18n/server";
 
 export default async function MaterialPricesPage({
   params,
@@ -20,6 +21,7 @@ export default async function MaterialPricesPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const dictionary = await getDictionary();
   const offer = await getOfferById(id);
 
   if (!offer) {
@@ -35,13 +37,13 @@ export default async function MaterialPricesPage({
         <Card>
           <CardHeader>
             <div>
-              <CardTitle>{offer.name} / Material Prices</CardTitle>
+              <CardTitle>{offer.name} / {dictionary.materialPrices.title}</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-2">
               <Button nativeButton={false} variant="outline" size="sm" render={<Link href={`/offers/${id}/overview`} />}>
-                Back to overview
+                {dictionary.common.backToOverview}
               </Button>
             </div>
             <MaterialPricesTable offerId={id} prices={prices} />
@@ -50,14 +52,14 @@ export default async function MaterialPricesPage({
 
         <Card>
           <CardHeader>
-            <CardTitle>Summary</CardTitle>
+            <CardTitle>{dictionary.common.summary}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <SummaryRow label="Materials" value={summary.total.toString()} />
-            <SummaryRow label="Overrides" value={summary.overridden.toString()} />
-            <SummaryRow label="Unresolved" value={summary.unresolved.toString()} />
+            <SummaryRow label={dictionary.common.materials} value={summary.total.toString()} />
+            <SummaryRow label={dictionary.materialPrices.overrides} value={summary.overridden.toString()} />
+            <SummaryRow label={dictionary.common.unresolved} value={summary.unresolved.toString()} />
             <div className="space-y-2 rounded-xl border bg-muted/50 p-4">
-              <div className="text-sm text-muted-foreground">Calculation status</div>
+              <div className="text-sm text-muted-foreground">{dictionary.overview.calculationStatus}</div>
               <CalculationStatusBadge status={offer.calculationStatus} />
             </div>
           </CardContent>

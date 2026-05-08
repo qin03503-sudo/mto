@@ -22,12 +22,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useI18n } from "@/i18n/client";
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 4,
 });
 
 export default function MtoRowsPage() {
+  const { dictionary } = useI18n();
   const [mtoRowsData, setMtoRowsData] = useState<any[]>([]);
   const [scopesData, setScopesData] = useState<any[]>([]);
   const [partsData, setPartsData] = useState<any[]>([]);
@@ -59,7 +61,7 @@ export default function MtoRowsPage() {
     return (
       <AppShell>
         <div className="flex items-center justify-center py-20">
-          <div className="text-muted-foreground">Loading...</div>
+          <div className="text-muted-foreground">{dictionary.common.loading}</div>
         </div>
       </AppShell>
     );
@@ -71,23 +73,23 @@ export default function MtoRowsPage() {
         <Card className="shadow-sm">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>MTO Master Rows</CardTitle>
+              <CardTitle>{dictionary.masterData.mtoMasterRows}</CardTitle>
               <div className="flex items-center gap-2">
                 <Input
-                  placeholder="Search MTO rows..."
+                  placeholder={dictionary.masterData.searchMtoRows}
                   className="h-10 w-48"
                   // In a real implementation, you would add search/filter logic here
                 />
                 <Button
                   variant="outline"
                   size="icon"
-                  aria-label="Refresh"
+                  aria-label={dictionary.common.refresh}
                   onClick={() => window.location.reload()}
                 >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
                 <Link href="/mto-rows/new">
-                  <Button variant="default" size="icon" aria-label="Add new MTO row">
+                  <Button variant="default" size="icon" aria-label={`${dictionary.common.addNew} MTO row`}>
                     <Plus className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -98,20 +100,20 @@ export default function MtoRowsPage() {
             <div className="overflow-hidden rounded-2xl border">
               {mtoRowsData.length === 0 ? (
                 <div className="py-10 text-center text-muted-foreground">
-                  No MTO rows found. Click the + button to add one.
+                  {dictionary.masterData.noMtoRows}
                 </div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Scope</TableHead>
-                      <TableHead>Part</TableHead>
-                      <TableHead>Material</TableHead>
-                      <TableHead className="text-center">Quantity</TableHead>
-                      <TableHead className="text-center">Value</TableHead>
-                      <TableHead className="text-center">Unit</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead className="w-20">Actions</TableHead>
+                      <TableHead>{dictionary.common.scope}</TableHead>
+                      <TableHead>{dictionary.common.part}</TableHead>
+                      <TableHead>{dictionary.common.material}</TableHead>
+                      <TableHead className="text-center">{dictionary.common.quantity}</TableHead>
+                      <TableHead className="text-center">{dictionary.common.value}</TableHead>
+                      <TableHead className="text-center">{dictionary.common.unit}</TableHead>
+                      <TableHead>{dictionary.common.description}</TableHead>
+                      <TableHead className="w-20">{dictionary.common.actions}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -122,13 +124,13 @@ export default function MtoRowsPage() {
                       return (
                         <TableRow key={row.id} className="hover:bg-muted">
                           <TableCell>
-                            {scope?.name ?? "Unknown Scope"}
+                            {scope?.name ?? dictionary.masterData.unknownScope}
                           </TableCell>
                           <TableCell>
-                            {part?.name ?? "Unknown Part"}
+                            {part?.name ?? dictionary.masterData.unknownPart}
                           </TableCell>
                           <TableCell>
-                            {material?.name ?? "Unknown Material"}
+                            {material?.name ?? dictionary.masterData.unknownMaterial}
                           </TableCell>
                           <TableCell className="text-center">{row.quantity}</TableCell>
                           <TableCell className="text-center">
@@ -143,7 +145,7 @@ export default function MtoRowsPage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                aria-label="Edit MTO row"
+                                aria-label={`${dictionary.common.edit} MTO row`}
                               >
                                 <Edit className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
                               </Button>
@@ -151,9 +153,9 @@ export default function MtoRowsPage() {
                             <Button
                               variant="destructive"
                               size="icon"
-                              aria-label="Delete MTO row"
+                              aria-label={`${dictionary.common.delete} MTO row`}
                               onClick={async () => {
-                                if (window.confirm("Are you sure you want to delete this MTO row?")) {
+                                if (window.confirm(dictionary.masterData.deleteMtoRowConfirm)) {
                                   try {
                                     const deleteRes = await fetch(`/api/v1/mto-rows?id=${row.id}`, {
                                       method: "DELETE",
@@ -164,7 +166,7 @@ export default function MtoRowsPage() {
                                     // Refetch the data
                                     window.location.reload();
                                   } catch (error) {
-                                    alert("Failed to delete MTO row");
+                                    alert(dictionary.masterData.failedDeleteMtoRow);
                                   }
                                 }
                               }}

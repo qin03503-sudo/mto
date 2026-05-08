@@ -10,17 +10,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { PlusIcon, EditIcon, TrashIcon } from "lucide-react";
 import { useState } from "react";
 import { createMaterial, updateMaterial, deleteMaterial, createScope, updateScope, deleteScope, createPart, updatePart, deletePart, createMtoRow, updateMtoRow, deleteMtoRow } from "./actions";
+import { useI18n } from "@/i18n/client";
 
 export function MasterDataClientWrapper({ materials, scopes, parts, mtoRows, units }: { materials: Material[]; scopes: Scope[]; parts: Part[]; mtoRows: MtoRow[]; units: Unit[] }) {
+  const { dictionary } = useI18n();
   const [activeTab, setActiveTab] = useState<"materials" | "scopes" | "parts" | "mtoRows">("materials");
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2 mb-4">
-        <Button variant={activeTab === "materials" ? "default" : "outline"} onClick={() => setActiveTab("materials")}>Materials</Button>
-        <Button variant={activeTab === "scopes" ? "default" : "outline"} onClick={() => setActiveTab("scopes")}>Scopes</Button>
-        <Button variant={activeTab === "parts" ? "default" : "outline"} onClick={() => setActiveTab("parts")}>Parts</Button>
-        <Button variant={activeTab === "mtoRows" ? "default" : "outline"} onClick={() => setActiveTab("mtoRows")}>MTO Rows</Button>
+        <Button variant={activeTab === "materials" ? "default" : "outline"} onClick={() => setActiveTab("materials")}>{dictionary.common.materials}</Button>
+        <Button variant={activeTab === "scopes" ? "default" : "outline"} onClick={() => setActiveTab("scopes")}>{dictionary.common.scopes}</Button>
+        <Button variant={activeTab === "parts" ? "default" : "outline"} onClick={() => setActiveTab("parts")}>{dictionary.common.parts}</Button>
+        <Button variant={activeTab === "mtoRows" ? "default" : "outline"} onClick={() => setActiveTab("mtoRows")}>{dictionary.masterData.mtoRowsTitle}</Button>
       </div>
 
       {activeTab === "materials" && <MaterialsTable materials={materials} units={units} />}
@@ -32,21 +34,23 @@ export function MasterDataClientWrapper({ materials, scopes, parts, mtoRows, uni
 }
 
 function MaterialsTable({ materials, units }: { materials: Material[]; units: Unit[] }) {
+  const { dictionary } = useI18n();
+
   return (
     <div className="rounded-md border">
       <div className="p-4 flex justify-between items-center bg-muted/50 border-b">
-        <h3 className="font-semibold text-lg">Materials</h3>
+        <h3 className="font-semibold text-lg">{dictionary.common.materials}</h3>
         <MaterialDialog units={units} />
       </div>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>ID</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Dimension</TableHead>
-            <TableHead>Unit</TableHead>
-            <TableHead>Default Price</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
+            <TableHead>{dictionary.common.name}</TableHead>
+            <TableHead>{dictionary.common.dimension}</TableHead>
+            <TableHead>{dictionary.common.unit}</TableHead>
+            <TableHead>{dictionary.common.defaultPrice}</TableHead>
+            <TableHead className="w-[100px]">{dictionary.common.actions}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -70,6 +74,7 @@ function MaterialsTable({ materials, units }: { materials: Material[]; units: Un
 }
 
 function MaterialDialog({ material, units, mode = "add" }: { material?: Material; units: Unit[]; mode?: "add" | "edit" }) {
+  const { dictionary } = useI18n();
   const [open, setOpen] = useState(false);
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -90,7 +95,7 @@ function MaterialDialog({ material, units, mode = "add" }: { material?: Material
       <DialogTrigger
         render={
           mode === "add" ? (
-            <Button size="sm"><PlusIcon className="w-4 h-4 mr-2" />Add Material</Button>
+            <Button size="sm"><PlusIcon className="w-4 h-4 mr-2" />{dictionary.masterData.addMaterial}</Button>
           ) : (
             <Button variant="ghost" size="icon"><EditIcon className="w-4 h-4" /></Button>
           )
@@ -98,22 +103,22 @@ function MaterialDialog({ material, units, mode = "add" }: { material?: Material
       />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{mode === "add" ? "Add Material" : "Edit Material"}</DialogTitle>
+          <DialogTitle>{mode === "add" ? dictionary.masterData.addMaterial : dictionary.masterData.editMaterial}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === "add" && (
             <div><Label>ID</Label><Input name="id" required /></div>
           )}
-          <div><Label>Name</Label><Input name="name" defaultValue={material?.name} required /></div>
-          <div><Label>Dimension</Label><Input name="dimension" defaultValue={material?.dimension} required /></div>
+          <div><Label>{dictionary.common.name}</Label><Input name="name" defaultValue={material?.name} required /></div>
+          <div><Label>{dictionary.common.dimension}</Label><Input name="dimension" defaultValue={material?.dimension} required /></div>
           <div>
-            <Label>Unit</Label>
+            <Label>{dictionary.common.unit}</Label>
             <select name="unitId" defaultValue={material?.unitId} className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
               {units.map((u: Unit) => <option key={u.id} value={u.id}>{u.name} ({u.symbol})</option>)}
             </select>
           </div>
-          <div><Label>Default Price</Label><Input name="defaultPrice" type="number" step="0.01" defaultValue={material?.defaultPrice === null ? undefined : material?.defaultPrice} /></div>
-          <Button type="submit" className="w-full">Save</Button>
+          <div><Label>{dictionary.common.defaultPrice}</Label><Input name="defaultPrice" type="number" step="0.01" defaultValue={material?.defaultPrice === null ? undefined : material?.defaultPrice} /></div>
+          <Button type="submit" className="w-full">{dictionary.common.save}</Button>
         </form>
       </DialogContent>
     </Dialog>
@@ -121,19 +126,21 @@ function MaterialDialog({ material, units, mode = "add" }: { material?: Material
 }
 
 function ScopesTable({ scopes }: { scopes: Scope[] }) {
+  const { dictionary } = useI18n();
+
   return (
     <div className="rounded-md border">
       <div className="p-4 flex justify-between items-center bg-muted/50 border-b">
-        <h3 className="font-semibold text-lg">Scopes</h3>
+        <h3 className="font-semibold text-lg">{dictionary.common.scopes}</h3>
         <ScopeDialog />
       </div>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>ID</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
+            <TableHead>{dictionary.common.name}</TableHead>
+            <TableHead>{dictionary.common.description}</TableHead>
+            <TableHead className="w-[100px]">{dictionary.common.actions}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -155,6 +162,7 @@ function ScopesTable({ scopes }: { scopes: Scope[] }) {
 }
 
 function ScopeDialog({ scope, mode = "add" }: { scope?: Scope; mode?: "add" | "edit" }) {
+  const { dictionary } = useI18n();
   const [open, setOpen] = useState(false);
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -173,19 +181,19 @@ function ScopeDialog({ scope, mode = "add" }: { scope?: Scope; mode?: "add" | "e
       <DialogTrigger
         render={
           mode === "add" ? (
-            <Button size="sm"><PlusIcon className="w-4 h-4 mr-2" />Add Scope</Button>
+            <Button size="sm"><PlusIcon className="w-4 h-4 mr-2" />{dictionary.masterData.addScope}</Button>
           ) : (
             <Button variant="ghost" size="icon"><EditIcon className="w-4 h-4" /></Button>
           )
         }
       />
       <DialogContent>
-        <DialogHeader><DialogTitle>{mode === "add" ? "Add Scope" : "Edit Scope"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{mode === "add" ? dictionary.masterData.addScope : dictionary.masterData.editScope}</DialogTitle></DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === "add" && <div><Label>ID</Label><Input name="id" required /></div>}
-          <div><Label>Name</Label><Input name="name" defaultValue={scope?.name} required /></div>
-          <div><Label>Description</Label><Input name="description" defaultValue={scope?.description} required /></div>
-          <Button type="submit" className="w-full">Save</Button>
+          <div><Label>{dictionary.common.name}</Label><Input name="name" defaultValue={scope?.name} required /></div>
+          <div><Label>{dictionary.common.description}</Label><Input name="description" defaultValue={scope?.description} required /></div>
+          <Button type="submit" className="w-full">{dictionary.common.save}</Button>
         </form>
       </DialogContent>
     </Dialog>
@@ -193,19 +201,21 @@ function ScopeDialog({ scope, mode = "add" }: { scope?: Scope; mode?: "add" | "e
 }
 
 function PartsTable({ parts, scopes }: { parts: Part[]; scopes: Scope[] }) {
+  const { dictionary } = useI18n();
+
   return (
     <div className="rounded-md border">
       <div className="p-4 flex justify-between items-center bg-muted/50 border-b">
-        <h3 className="font-semibold text-lg">Parts</h3>
+        <h3 className="font-semibold text-lg">{dictionary.common.parts}</h3>
         <PartDialog scopes={scopes} />
       </div>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>ID</TableHead>
-            <TableHead>Scope</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
+            <TableHead>{dictionary.common.scope}</TableHead>
+            <TableHead>{dictionary.common.name}</TableHead>
+            <TableHead className="w-[100px]">{dictionary.common.actions}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -227,6 +237,7 @@ function PartsTable({ parts, scopes }: { parts: Part[]; scopes: Scope[] }) {
 }
 
 function PartDialog({ part, scopes, mode = "add" }: { part?: Part; scopes: Scope[]; mode?: "add" | "edit" }) {
+  const { dictionary } = useI18n();
   const [open, setOpen] = useState(false);
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -245,24 +256,24 @@ function PartDialog({ part, scopes, mode = "add" }: { part?: Part; scopes: Scope
       <DialogTrigger
         render={
           mode === "add" ? (
-            <Button size="sm"><PlusIcon className="w-4 h-4 mr-2" />Add Part</Button>
+            <Button size="sm"><PlusIcon className="w-4 h-4 mr-2" />{dictionary.masterData.addPart}</Button>
           ) : (
             <Button variant="ghost" size="icon"><EditIcon className="w-4 h-4" /></Button>
           )
         }
       />
       <DialogContent>
-        <DialogHeader><DialogTitle>{mode === "add" ? "Add Part" : "Edit Part"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{mode === "add" ? dictionary.masterData.addPart : dictionary.masterData.editPart}</DialogTitle></DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === "add" && <div><Label>ID</Label><Input name="id" required /></div>}
-          <div><Label>Name</Label><Input name="name" defaultValue={part?.name} required /></div>
+          <div><Label>{dictionary.common.name}</Label><Input name="name" defaultValue={part?.name} required /></div>
           <div>
-            <Label>Scope</Label>
+            <Label>{dictionary.common.scope}</Label>
             <select name="scopeId" defaultValue={part?.scopeId} className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background">
               {scopes.map((s: Scope) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>
-          <Button type="submit" className="w-full">Save</Button>
+          <Button type="submit" className="w-full">{dictionary.common.save}</Button>
         </form>
       </DialogContent>
     </Dialog>
@@ -270,23 +281,25 @@ function PartDialog({ part, scopes, mode = "add" }: { part?: Part; scopes: Scope
 }
 
 function MtoRowsTable({ mtoRows, scopes, parts, materials }: { mtoRows: MtoRow[]; scopes: Scope[]; parts: Part[]; materials: Material[] }) {
+  const { dictionary } = useI18n();
+
   return (
     <div className="rounded-md border">
       <div className="p-4 flex justify-between items-center bg-muted/50 border-b">
-        <h3 className="font-semibold text-lg">MTO Rows</h3>
+        <h3 className="font-semibold text-lg">{dictionary.masterData.mtoRowsTitle}</h3>
         <MtoRowDialog scopes={scopes} parts={parts} materials={materials} />
       </div>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Scope</TableHead>
-            <TableHead>Part</TableHead>
-            <TableHead>Material</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead>Quantity</TableHead>
-            <TableHead>Value</TableHead>
-            <TableHead>Unit</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
+            <TableHead>{dictionary.common.scope}</TableHead>
+            <TableHead>{dictionary.common.part}</TableHead>
+            <TableHead>{dictionary.common.material}</TableHead>
+            <TableHead>{dictionary.common.description}</TableHead>
+            <TableHead>{dictionary.common.quantity}</TableHead>
+            <TableHead>{dictionary.common.value}</TableHead>
+            <TableHead>{dictionary.common.unit}</TableHead>
+            <TableHead className="w-[100px]">{dictionary.common.actions}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -312,6 +325,7 @@ function MtoRowsTable({ mtoRows, scopes, parts, materials }: { mtoRows: MtoRow[]
 }
 
 function MtoRowDialog({ mtoRow, scopes, parts, materials, mode = "add" }: { mtoRow?: MtoRow; scopes: Scope[]; parts: Part[]; materials: Material[]; mode?: "add" | "edit" }) {
+  const { dictionary } = useI18n();
   const [open, setOpen] = useState(false);
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -335,43 +349,43 @@ function MtoRowDialog({ mtoRow, scopes, parts, materials, mode = "add" }: { mtoR
       <DialogTrigger
         render={
           mode === "add" ? (
-            <Button size="sm"><PlusIcon className="w-4 h-4 mr-2" />Add MTO Row</Button>
+            <Button size="sm"><PlusIcon className="w-4 h-4 mr-2" />{dictionary.masterData.addMtoRow}</Button>
           ) : (
             <Button variant="ghost" size="icon"><EditIcon className="w-4 h-4" /></Button>
           )
         }
       />
       <DialogContent className="max-w-md">
-        <DialogHeader><DialogTitle>{mode === "add" ? "Add MTO Row" : "Edit MTO Row"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{mode === "add" ? dictionary.masterData.addMtoRow : dictionary.masterData.editMtoRow}</DialogTitle></DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === "add" && <div><Label>ID</Label><Input name="id" required /></div>}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Scope</Label>
+              <Label>{dictionary.common.scope}</Label>
               <select name="scopeId" defaultValue={mtoRow?.scopeId} className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm">
                 {scopes.map((s: Scope) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
             <div>
-              <Label>Part</Label>
+              <Label>{dictionary.common.part}</Label>
               <select name="partId" defaultValue={mtoRow?.partId} className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm">
                 {parts.map((p: Part) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             </div>
           </div>
           <div>
-            <Label>Material</Label>
+            <Label>{dictionary.common.material}</Label>
             <select name="materialId" defaultValue={mtoRow?.materialId} className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm">
               {materials.map((m: Material) => <option key={m.id} value={m.id}>{m.name}</option>)}
             </select>
           </div>
-          <div><Label>Description</Label><Input name="description" defaultValue={mtoRow?.description} required /></div>
+          <div><Label>{dictionary.common.description}</Label><Input name="description" defaultValue={mtoRow?.description} required /></div>
           <div className="grid grid-cols-3 gap-4">
-            <div><Label>Quantity</Label><Input name="quantity" type="number" step="0.01" defaultValue={mtoRow?.quantity || 1} required /></div>
-            <div><Label>Value</Label><Input name="value" type="number" step="0.0001" defaultValue={mtoRow?.value} required /></div>
-            <div><Label>Unit</Label><Input name="unit" defaultValue={mtoRow?.unit} /></div>
+            <div><Label>{dictionary.common.quantity}</Label><Input name="quantity" type="number" step="0.01" defaultValue={mtoRow?.quantity || 1} required /></div>
+            <div><Label>{dictionary.common.value}</Label><Input name="value" type="number" step="0.0001" defaultValue={mtoRow?.value} required /></div>
+            <div><Label>{dictionary.common.unit}</Label><Input name="unit" defaultValue={mtoRow?.unit} /></div>
           </div>
-          <Button type="submit" className="w-full">Save</Button>
+          <Button type="submit" className="w-full">{dictionary.common.save}</Button>
         </form>
       </DialogContent>
     </Dialog>

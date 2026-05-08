@@ -9,6 +9,7 @@ import {
 } from "@/components/offer-status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useI18n } from "@/i18n/client";
 import {
   Table,
   TableBody,
@@ -19,22 +20,22 @@ import {
 } from "@/components/ui/table";
 import type { Offer, OfferStatus } from "@/lib/offers";
 
-const statusFilters: Array<{ label: string; value: "all" | OfferStatus }> = [
-  { label: "All", value: "all" },
-  { label: "Draft", value: "draft" },
-  { label: "Pricing", value: "pricing" },
-  { label: "Ready", value: "ready" },
-  { label: "Sent", value: "sent" },
-  { label: "Closed", value: "closed" },
+const statusFilters: Array<{ key: "all" | OfferStatus; value: "all" | OfferStatus }> = [
+  { key: "all", value: "all" },
+  { key: "draft", value: "draft" },
+  { key: "pricing", value: "pricing" },
+  { key: "ready", value: "ready" },
+  { key: "sent", value: "sent" },
+  { key: "closed", value: "closed" },
 ];
 
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
-
 export function OffersTable({ offers }: { offers: Offer[] }) {
+  const { dictionary, locale } = useI18n();
+  const currencyFormatter = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"all" | OfferStatus>("all");
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
@@ -57,7 +58,7 @@ export function OffersTable({ offers }: { offers: Offer[] }) {
         <Input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search by offer, number, or owner..."
+          placeholder={dictionary.offers.searchPlaceholder}
         />
         <div className="flex flex-wrap gap-2">
           {statusFilters.map((filter) => (
@@ -68,7 +69,7 @@ export function OffersTable({ offers }: { offers: Offer[] }) {
               variant={status === filter.value ? "default" : "outline"}
               onClick={() => setStatus(filter.value)}
             >
-              {filter.label}
+              {dictionary.statuses[filter.key]}
             </Button>
           ))}
         </div>
@@ -78,19 +79,19 @@ export function OffersTable({ offers }: { offers: Offer[] }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Offer</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Calculation</TableHead>
-              <TableHead className="hidden md:table-cell">Owner</TableHead>
-              <TableHead className="hidden lg:table-cell">Close date</TableHead>
-              <TableHead className="text-right">Total</TableHead>
+              <TableHead>{dictionary.common.offer}</TableHead>
+              <TableHead>{dictionary.common.status}</TableHead>
+              <TableHead>{dictionary.offers.calculation}</TableHead>
+              <TableHead className="hidden md:table-cell">{dictionary.common.owner}</TableHead>
+              <TableHead className="hidden lg:table-cell">{dictionary.common.closeDate}</TableHead>
+              <TableHead className="text-right">{dictionary.common.total}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredOffers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
-                  No offers match the current search and status filter.
+                  {dictionary.offers.noMatches}
                 </TableCell>
               </TableRow>
             ) : (
@@ -104,7 +105,7 @@ export function OffersTable({ offers }: { offers: Offer[] }) {
                       {offer.name}
                     </Link>
                     <div className="text-xs text-muted-foreground">
-                      {offer.offerNumber} · {offer.scopes} scopes · {offer.lines} lines
+                      {offer.offerNumber} · {offer.scopes} {dictionary.offers.scopesCount} · {offer.lines} {dictionary.offers.linesCount}
                     </div>
                   </TableCell>
                   <TableCell>

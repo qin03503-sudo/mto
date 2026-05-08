@@ -22,8 +22,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useI18n } from "@/i18n/client";
 
 export default function MaterialsPage() {
+  const { dictionary } = useI18n();
   const [materialsData, setMaterialsData] = useState<any[]>([]);
   const [unitsData, setUnitsData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +49,7 @@ export default function MaterialsPage() {
     return (
       <AppShell>
         <div className="flex items-center justify-center py-20">
-          <div className="text-muted-foreground">Loading...</div>
+          <div className="text-muted-foreground">{dictionary.common.loading}</div>
         </div>
       </AppShell>
     );
@@ -59,23 +61,23 @@ export default function MaterialsPage() {
         <Card className="shadow-sm">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Materials Master</CardTitle>
+              <CardTitle>{dictionary.masterData.materialsMaster}</CardTitle>
               <div className="flex items-center gap-2">
                 <Input
-                  placeholder="Search materials..."
+                  placeholder={dictionary.masterData.searchMaterials}
                   className="h-10 w-48"
                   // In a real implementation, you would add search/filter logic here
                 />
                 <Button
                   variant="outline"
                   size="icon"
-                  aria-label="Refresh"
+                  aria-label={dictionary.common.refresh}
                   onClick={() => window.location.reload()}
                 >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
                 <Link href="/materials/new">
-                  <Button variant="default" size="icon" aria-label="Add new material">
+                  <Button variant="default" size="icon" aria-label={`${dictionary.common.addNew} ${dictionary.common.material}`}>
                     <Plus className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -86,16 +88,16 @@ export default function MaterialsPage() {
             <div className="overflow-hidden rounded-2xl border">
               {materialsData.length === 0 ? (
                 <div className="py-10 text-center text-muted-foreground">
-                  No materials found. Click the + button to add one.
+                  {dictionary.masterData.noMaterials}
                 </div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Material</TableHead>
-                      <TableHead>Unit</TableHead>
-                      <TableHead className="text-center">Default Price</TableHead>
-                      <TableHead className="w-20">Actions</TableHead>
+                      <TableHead>{dictionary.common.material}</TableHead>
+                      <TableHead>{dictionary.common.unit}</TableHead>
+                      <TableHead className="text-center">{dictionary.common.defaultPrice}</TableHead>
+                      <TableHead className="w-20">{dictionary.common.actions}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -110,7 +112,7 @@ export default function MaterialsPage() {
                           <TableCell>{unit?.symbol ?? "-"}</TableCell>
                           <TableCell className="text-center">
                             {material.defaultPrice === null
-                              ? "Unresolved"
+                              ? dictionary.common.unresolved
                               : material.defaultPrice.toFixed(2)}
                           </TableCell>
                           <TableCell className="flex items-center gap-2 text-right">
@@ -118,7 +120,7 @@ export default function MaterialsPage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                aria-label="Edit material"
+                                aria-label={`${dictionary.common.edit} ${dictionary.common.material}`}
                               >
                                 <Edit className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
                               </Button>
@@ -126,9 +128,9 @@ export default function MaterialsPage() {
                             <Button
                               variant="destructive"
                               size="icon"
-                              aria-label="Delete material"
+                              aria-label={`${dictionary.common.delete} ${dictionary.common.material}`}
                               onClick={async () => {
-                                if (window.confirm("Are you sure you want to delete this material?")) {
+                                if (window.confirm(dictionary.masterData.deleteMaterialConfirm)) {
                                   try {
                                     const deleteRes = await fetch(`/api/v1/materials?id=${material.id}`, {
                                       method: "DELETE",
@@ -139,7 +141,7 @@ export default function MaterialsPage() {
                                     // Refetch the data
                                     window.location.reload();
                                   } catch (error) {
-                                    alert("Failed to delete material");
+                                    alert(dictionary.masterData.failedDeleteMaterial);
                                   }
                                 }
                               }}

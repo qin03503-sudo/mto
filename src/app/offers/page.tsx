@@ -15,14 +15,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getOfferSummary, getOffers } from "@/lib/offers";
-
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
+import { getDictionary, getLocale } from "@/i18n/server";
 
 export default async function OffersPage() {
+  const locale = await getLocale();
+  const dictionary = await getDictionary();
+  const currencyFormatter = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
   const offers = await getOffers();
   const summary = await getOfferSummary();
   const currentOffers = offers.filter((offer) => offer.calculationStatus === "current").length;
@@ -32,33 +34,33 @@ export default async function OffersPage() {
     <AppShell>
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <MetricCard
-          title="Active offers"
+          title={dictionary.offers.activeOffers}
           value={summary.activeOffers.toString()}
-          description="Offers in the current pipeline"
+          description={dictionary.offers.activeOffersDescription}
           icon={<ClipboardList className="size-4" />}
         />
         <MetricCard
-          title="Open value"
+          title={dictionary.offers.openValue}
           value={currencyFormatter.format(summary.openValue)}
-          description="Total value across active offers"
+          description={dictionary.offers.openValueDescription}
           icon={<TrendingUp className="size-4" />}
         />
         <MetricCard
-          title="Outdated calculations"
+          title={dictionary.offers.outdatedCalculations}
           value={summary.outdatedCalculations.toString()}
-          description="Need recalculation after data changes"
+          description={dictionary.offers.outdatedCalculationsDescription}
           icon={<AlertTriangle className="size-4" />}
         />
         <MetricCard
-          title="Configured lines"
+          title={dictionary.offers.configuredLines}
           value={summary.linesConfigured.toString()}
-          description="Line entries ready for part pricing"
+          description={dictionary.offers.configuredLinesDescription}
           icon={<GitBranch className="size-4" />}
         />
         <MetricCard
-          title="Current calculations"
+          title={dictionary.offers.currentCalculations}
           value={`${completionRate}%`}
-          description="Offers with up-to-date calculation output"
+          description={dictionary.offers.currentCalculationsDescription}
           icon={<TrendingUp className="size-4" />}
         />
       </section>
@@ -66,7 +68,7 @@ export default async function OffersPage() {
       <section>
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Offer Workbench</CardTitle>
+            <CardTitle>{dictionary.offers.workbench}</CardTitle>
           </CardHeader>
           <CardContent>
             <OffersTable offers={offers} />

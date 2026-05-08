@@ -22,8 +22,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useI18n } from "@/i18n/client";
 
 export default function PartsPage() {
+  const { dictionary } = useI18n();
   const [partsData, setPartsData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +44,7 @@ export default function PartsPage() {
     return (
       <AppShell>
         <div className="flex items-center justify-center py-20">
-          <div className="text-muted-foreground">Loading...</div>
+          <div className="text-muted-foreground">{dictionary.common.loading}</div>
         </div>
       </AppShell>
     );
@@ -54,23 +56,23 @@ export default function PartsPage() {
         <Card className="shadow-sm">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Parts Master</CardTitle>
+              <CardTitle>{dictionary.masterData.partsMaster}</CardTitle>
               <div className="flex items-center gap-2">
                 <Input
-                  placeholder="Search parts..."
+                  placeholder={dictionary.masterData.searchParts}
                   className="h-10 w-48"
                   // In a real implementation, you would add search/filter logic here
                 />
                 <Button
                   variant="outline"
                   size="icon"
-                  aria-label="Refresh"
+                  aria-label={dictionary.common.refresh}
                   onClick={() => window.location.reload()}
                 >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
                 <Link href="/parts/new">
-                  <Button variant="default" size="icon" aria-label="Add new part">
+                  <Button variant="default" size="icon" aria-label={`${dictionary.common.addNew} ${dictionary.common.part}`}>
                     <Plus className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -81,15 +83,15 @@ export default function PartsPage() {
             <div className="overflow-hidden rounded-2xl border">
               {partsData.length === 0 ? (
                 <div className="py-10 text-center text-muted-foreground">
-                  No parts found. Click the + button to add one.
+                  {dictionary.masterData.noParts}
                 </div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Part Name</TableHead>
-                      <TableHead>Scope</TableHead>
-                      <TableHead className="w-20">Actions</TableHead>
+                      <TableHead>{dictionary.masterData.partName}</TableHead>
+                      <TableHead>{dictionary.common.scope}</TableHead>
+                      <TableHead className="w-20">{dictionary.common.actions}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -99,14 +101,14 @@ export default function PartsPage() {
                           <div className="font-medium">{part.name}</div>
                         </TableCell>
                         <TableCell>
-                          {part.scope ? part.scope.name : "Unknown Scope"}
+                          {part.scope ? part.scope.name : dictionary.masterData.unknownScope}
                         </TableCell>
                         <TableCell className="flex items-center gap-2 text-right">
                           <Link href={`/parts/${part.id}/edit`}>
                             <Button
                               variant="ghost"
                               size="icon"
-                              aria-label="Edit part"
+                              aria-label={`${dictionary.common.edit} ${dictionary.common.part}`}
                             >
                               <Edit className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
                             </Button>
@@ -114,9 +116,9 @@ export default function PartsPage() {
                           <Button
                             variant="destructive"
                             size="icon"
-                            aria-label="Delete part"
+                            aria-label={`${dictionary.common.delete} ${dictionary.common.part}`}
                             onClick={async () => {
-                              if (window.confirm("Are you sure you want to delete this part?")) {
+                              if (window.confirm(dictionary.masterData.deletePartConfirm)) {
                                 try {
                                   const deleteRes = await fetch(`/api/v1/parts?id=${part.id}`, {
                                     method: "DELETE",
@@ -127,7 +129,7 @@ export default function PartsPage() {
                                   // Refetch the data
                                   window.location.reload();
                                 } catch (error) {
-                                  alert("Failed to delete part");
+                                  alert(dictionary.masterData.failedDeletePart);
                                 }
                               }
                             }}

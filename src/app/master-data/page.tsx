@@ -4,8 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { getMaterials, getMtoVersions, getUnits } from "@/lib/master-data";
 import { getMtoRows, getPartsForScope, getScopes } from "@/lib/scopes-lines";
 import { MasterDataClientWrapper } from "./client-wrapper";
+import { getDictionary } from "@/i18n/server";
 
 export default async function MasterDataPage() {
+  const dictionary = await getDictionary();
   const [materials, , units, scopes, parts, mtoRows] = await Promise.all([
     getMaterials(),
     getMtoVersions(),
@@ -18,17 +20,17 @@ export default async function MasterDataPage() {
   return (
     <AppShell>
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard title="Materials" value={materials.length} icon={<Factory />} />
-        <MetricCard title="Scopes" value={scopes.length} icon={<Layers3 />} />
-        <MetricCard title="Parts" value={parts.length} icon={<PackageSearch />} />
-        <MetricCard title="MTO rows" value={mtoRows.length} icon={<Database />} />
+        <MetricCard title={dictionary.common.materials} value={materials.length} icon={<Factory />} />
+        <MetricCard title={dictionary.common.scopes} value={scopes.length} icon={<Layers3 />} />
+        <MetricCard title={dictionary.common.parts} value={parts.length} icon={<PackageSearch />} />
+        <MetricCard title={dictionary.masterData.mtoRows} value={mtoRows.length} icon={<Database />} />
       </section>
 
       <section>
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Manage Master Data</CardTitle>
-            <CardDescription>Full CRUD operations for materials, scopes, parts, and MTO rows.</CardDescription>
+            <CardTitle>{dictionary.masterData.title}</CardTitle>
+            <CardDescription>{dictionary.masterData.description}</CardDescription>
           </CardHeader>
           <CardContent>
             <MasterDataClientWrapper
