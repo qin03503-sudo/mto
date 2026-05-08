@@ -206,13 +206,32 @@ export async function getScopeById(scopeId: string) {
   return prisma.scope.findUnique({ where: { id: scopeId } });
 }
 
+export async function getScopesByIds(scopeIds: string[]) {
+  return prisma.scope.findMany({
+    where: { id: { in: scopeIds } },
+  });
+}
+
 export async function getPartById(partId: string) {
   return prisma.part.findUnique({ where: { id: partId } });
+}
+
+export async function getPartsByIds(partIds: string[]) {
+  return prisma.part.findMany({
+    where: { id: { in: partIds } },
+  });
 }
 
 export async function getMtoRowsForPart(scopeId: string, partId: string) {
   return prisma.mtoRow.findMany({
     where: { scopeId, partId },
+    orderBy: { id: "asc" },
+  });
+}
+
+export async function getMtoRowsByPartIds(partIds: string[]) {
+  return prisma.mtoRow.findMany({
+    where: { partId: { in: partIds } },
     orderBy: { id: "asc" },
   });
 }
