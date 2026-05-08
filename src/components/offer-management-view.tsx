@@ -99,7 +99,7 @@ export function OfferManagementView({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as "all" | OfferStatus)}>
+          <Select value={statusFilter} onValueChange={(value) => value !== null && setStatusFilter(value as "all" | OfferStatus)}>
             <SelectTrigger className="h-10">
               <Layers3 className="size-4 text-muted-foreground" />
               <SelectValue />
@@ -121,7 +121,7 @@ export function OfferManagementView({
               {owners.map((owner) => <SelectItem key={owner} value={owner}>{owner}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Select value={dateFilter} onValueChange={(value) => setDateFilter(value as "all" | "7" | "14")}>
+          <Select value={dateFilter} onValueChange={(value) => value !== null && setDateFilter(value as "all" | "7" | "14")}>
             <SelectTrigger className="h-10">
               <CalendarClock className="size-4 text-muted-foreground" />
               <SelectValue />
@@ -132,7 +132,7 @@ export function OfferManagementView({
               <SelectItem value="14">{dictionary.management.next14Days}</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={sort} onValueChange={(value) => setSort(value as SortKey)}>
+          <Select value={sort} onValueChange={(value) => value !== null && setSort(value as SortKey)}>
             <SelectTrigger className="h-10">
               <ArrowUpDown className="size-4 text-muted-foreground" />
               <SelectValue />
