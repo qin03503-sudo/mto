@@ -8,14 +8,19 @@ import { defaultCurrency, normalizeCurrency, type PriceCurrency } from "@/lib/cu
 import { convertMoney } from "@/lib/exchange-rates";
 import {
   getOfferScopes,
-  getMtoRowsForPart,
-  getPartById,
-  getScopeById,
   getScopeLineSummary,
+
   getScopesByIds,
   getPartsByIds,
   getMtoRowsByPartIds,
+  OfferScope,
+  OfferLine,
+  OfferLinePart,
+  Scope,
+  Part,
+  MtoRow,
 } from "@/lib/scopes-lines";
+import { MaterialPrice } from "@/lib/material-prices";
 
 export type CalculationIssue = {
   code: string;
@@ -98,6 +103,98 @@ export type CalculationRun = {
   scopes: CalculationScopeResult[];
 };
 
+type ValidationContext = {
+  issues: CalculationIssue[];
+  scopesById: Map<string, Scope | undefined>;
+  partsById: Map<string, Part | undefined>;
+  mtoRowsByPartId: Map<string, MtoRow[]>;
+  materialPricesById: Map<string, MaterialPrice | undefined>;
+  missingMaterialPriceIds: Set<string>;
+};
+
+function validateOfferLinePart(
+  linePart: OfferLinePart,
+  offerScope: OfferScope,
+  scope: Scope | undefined,
+  ctx: ValidationContext
+) {
+  const part = ctx.partsById.get(linePart.partId);
+
+  if (!part || part.scopeId !== offerScope.scopeId) {
+    ctx.issues.push({
+      code: "INVALID_SCOPE_PART",
+      message: `${part?.name ?? "Part"} is not valid for ${scope?.name ?? "scope"}.`,
+    });
+  }
+
+  const mtoRows = part ? (ctx.mtoRowsByPartId.get(linePart.partId) ?? []) : [];
+
+  if (part && mtoRows.length === 0) {
+    ctx.issues.push({
+      code: "MISSING_MTO_ROWS",
+      message: `No MTO rows found for ${part.name} in ${scope?.name ?? "scope"}.`,
+    });
+  }
+
+  for (const row of mtoRows) {
+    const price = ctx.materialPricesById.get(row.materialId);
+
+    if (!price || price.projectPrice === null) {
+      ctx.missingMaterialPriceIds.add(row.materialId);
+    }
+  }
+
+  if (linePart.qty <= 0) {
+    ctx.issues.push({
+      code: "INVALID_QTY",
+      message: "Part quantity must be greater than zero.",
+    });
+  }
+}
+
+function validateOfferLine(
+  line: OfferLine,
+  offerScope: OfferScope,
+  scope: Scope | undefined,
+  ctx: ValidationContext
+) {
+  if (!line.name.trim()) {
+    ctx.issues.push({
+      code: "LINE_NAME_REQUIRED",
+      message: "Line name is required.",
+    });
+  }
+
+  if (line.parts.length === 0) {
+    ctx.issues.push({
+      code: "LINE_HAS_NO_PARTS",
+      message: `${line.name} must have at least one part.`,
+    });
+  }
+
+  for (const linePart of line.parts) {
+    validateOfferLinePart(linePart, offerScope, scope, ctx);
+  }
+}
+
+function validateOfferScope(
+  offerScope: OfferScope,
+  ctx: ValidationContext
+) {
+  const scope = ctx.scopesById.get(offerScope.scopeId);
+
+  if (offerScope.lines.length === 0) {
+    ctx.issues.push({
+      code: "SCOPE_HAS_NO_LINES",
+      message: `${scope?.name ?? "Scope"} must have at least one line.`,
+    });
+  }
+
+  for (const line of offerScope.lines) {
+    validateOfferLine(line, offerScope, scope, ctx);
+  }
+}
+
 export async function validateCalculationInputs(offerId: string) {
   const issues: CalculationIssue[] = [];
   const offer = await getOfferById(offerId);
@@ -141,66 +238,17 @@ export async function validateCalculationInputs(offerId: string) {
     mtoRowsByPartId.set(row.partId, rows);
   }
 
+  const ctx: ValidationContext = {
+    issues,
+    scopesById,
+    partsById,
+    mtoRowsByPartId,
+    materialPricesById,
+    missingMaterialPriceIds,
+  };
+
   for (const offerScope of offerScopes) {
-    const scope = scopesById.get(offerScope.scopeId);
-
-    if (offerScope.lines.length === 0) {
-      issues.push({
-        code: "SCOPE_HAS_NO_LINES",
-        message: `${scope?.name ?? "Scope"} must have at least one line.`,
-      });
-    }
-
-    for (const line of offerScope.lines) {
-      if (!line.name.trim()) {
-        issues.push({
-          code: "LINE_NAME_REQUIRED",
-          message: "Line name is required.",
-        });
-      }
-
-      if (line.parts.length === 0) {
-        issues.push({
-          code: "LINE_HAS_NO_PARTS",
-          message: `${line.name} must have at least one part.`,
-        });
-      }
-
-      for (const linePart of line.parts) {
-        const part = partsById.get(linePart.partId);
-
-        if (!part || part.scopeId !== offerScope.scopeId) {
-          issues.push({
-            code: "INVALID_SCOPE_PART",
-            message: `${part?.name ?? "Part"} is not valid for ${scope?.name ?? "scope"}.`,
-          });
-        }
-
-        const mtoRows = part ? (mtoRowsByPartId.get(linePart.partId) ?? []) : [];
-
-        if (part && mtoRows.length === 0) {
-          issues.push({
-            code: "MISSING_MTO_ROWS",
-            message: `No MTO rows found for ${part.name} in ${scope?.name ?? "scope"}.`,
-          });
-        }
-
-        for (const row of mtoRows) {
-          const price = materialPricesById.get(row.materialId);
-
-          if (!price || price.projectPrice === null) {
-            missingMaterialPriceIds.add(row.materialId);
-          }
-        }
-
-        if (linePart.qty <= 0) {
-          issues.push({
-            code: "INVALID_QTY",
-            message: "Part quantity must be greater than zero.",
-          });
-        }
-      }
-    }
+    validateOfferScope(offerScope, ctx);
   }
 
   if (scopeSummary.invalidQuantities > 0) {
